@@ -1652,6 +1652,18 @@ setTimeout(() => map.invalidateSize(), 300);
 const icoSt = L.divIcon({ className: '', html: '<span style="display:block;width:12px;height:12px;border-radius:50%;border:2px solid #00f0ff;background:rgba(0,240,255,0.4);box-shadow:0 0 8px #00f0ff"></span>', iconSize: [12, 12], iconAnchor: [6, 6] });
 const icoSel = L.divIcon({ className: '', html: '<span style="display:block;width:16px;height:16px;border-radius:50%;border:2px solid #ff6b2c;background:#ff6b2c;box-shadow:0 0 16px #ff6b2c"></span>', iconSize: [16, 16], iconAnchor: [8, 8] });
 const icoPin = L.divIcon({ className: '', html: '<div style="width:24px;height:24px;position:relative;display:flex;align-items:center;justify-content:center"><span style="position:absolute;width:24px;height:24px;border:2px dashed #00f0ff;border-radius:50%"></span><span style="display:block;width:10px;height:10px;background:#ff6b2c;border:2px solid #fff;border-radius:2px;transform:rotate(45deg);box-shadow:0 0 10px #ff6b2c"></span></div>', iconSize: [24, 24], iconAnchor: [12, 12] });
+
+const stMarkers = {};
+const stationLayerGroup = L.layerGroup();
+STATIONS.forEach(s => {
+  const m = L.marker([s.lat, s.lon], { icon: icoSt, keyboard: false })
+    .bindTooltip(`MERRA ${s.id} · ${s.elev}m`, { direction: 'top' });
+  stMarkers[s.id] = m;
+  stationLayerGroup.addLayer(m);
+});
+stationLayerGroup.addTo(map);
+
+const pin = L.marker([state.lat, state.lon], { icon: icoPin, draggable: true, zIndexOffset: 1000 });
 const link = L.polyline([], { color: '#00f0ff', weight: 2.5, dashArray: '4 6', opacity: 0.85 });
 const projectLayerGroup = L.layerGroup([link, pin]).addTo(map);
 

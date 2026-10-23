@@ -54,3 +54,8 @@
 - **tools/update_theme.js**: Sincronizadas las reglas CSS de .thermal-legend a ottom: 26px; right: 14px; para preservar coherencia entre herramientas de compilación.
 - **index.html, PG_RD.html, PG_RD_brutalista.html**: Regenerados mediante 
 ode tools/build_and_test.js (5/5 pruebas de validación numérica cruzada aprobadas, maxErr < 5e-9 °C).
+## [2026-10-22 19:57] - Restauración de funcionalidad interactiva completa del Workbench (stMarkers, stationLayerGroup, pin)
+- **tools/template.html**: Se restauró la inicialización de marcadores de estaciones (stMarkers), el grupo de capas stationLayerGroup (STATIONS.forEach(...)) y el marcador arrastrable del proyecto (pin). Este bloque había sido involuntariamente recortado por la expresión regular del script de tema previo, lo que provocaba una excepción de referencia (ReferenceError: pin is not defined) en la carga de la página, congelando toda interactividad y ejecución de ender().
+- **tools/update_theme.js**: Actualizado el bloque de reemplazo de iconos para incluir explícitamente stMarkers, stationLayerGroup y pin, evitando futuras regresiones.
+- **tools/build_and_test.js**: Añadida suite de pruebas de humo para <script id="ui"> que emula el entorno DOM, Leaflet y Chart.js en Node.js, validando la ejecución de ender(), setCoord(), setR() y updateHeatmap().
+- **index.html, PG_RD.html, PG_RD_brutalista.html**: Regenerados y probados al 100% (5/5 pruebas de cálculo Python vs JS aprobadas y ejecución de UI verificada).

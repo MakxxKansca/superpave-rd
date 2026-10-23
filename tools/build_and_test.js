@@ -28,4 +28,89 @@ for (const p of ctx.VERIF_PY) {
   if (!ok) fails++;
   console.log(`${ok ? 'PASS' : 'FAIL'} (${p.lat},${p.lon}) R=${p.R}/${p.R_ah} st=${j.st.id} Talto=${j.T_pav_alto.toFixed(4)} Tbajo=${j.T_pav_bajo.toFixed(4)} PGHrel=${j.PG_H_rel.toFixed(4)} PG ${j.PG_alto}${j.PG_bajo}/${j.PG_ah} maxErr=${maxErr.toExponential(2)}`);
 }
+
+// Test UI: ejecutar script <ui> en un sandbox simulado para asegurar que no hay ReferenceError
+try {
+  const makeElem = id => ({
+    id,
+    textContent: '',
+    innerHTML: '',
+    value: '18.5',
+    style: {},
+    dataset: { tab: 'tab-map', mode: 'talto', lat: '18.5', lon: '-70.0', r: '0.98' },
+    classList: { add: () => {}, remove: () => {} },
+    setAttribute: () => {},
+    addEventListener: () => {},
+    click: () => {}
+  });
+  const elems = {};
+  const mockDoc = {
+    getElementById: id => (elems[id] = elems[id] || makeElem(id)),
+    querySelectorAll: () => [makeElem('btn')],
+    addEventListener: () => {}
+  };
+  const mockL = {
+    divIcon: () => ({}),
+    marker: () => ({
+      bindTooltip: function() { return this; },
+      addTo: function() { return this; },
+      setLatLng: function() { return this; },
+      setIcon: function() { return this; },
+      on: function() { return this; }
+    }),
+    polyline: () => ({
+      addTo: function() { return this; },
+      setLatLngs: function() { return this; }
+    }),
+    layerGroup: () => ({
+      addTo: function() { return this; },
+      addLayer: function() { return this; }
+    }),
+    tileLayer: () => ({}),
+    map: () => ({
+      setView: function() { return this; },
+      invalidateSize: function() { return this; },
+      on: function() { return this; },
+      getZoom: () => 8,
+      addLayer: function() { return this; },
+      removeLayer: function() { return this; },
+      hasLayer: () => false
+    }),
+    control: {
+      layers: () => ({ addTo: () => {} })
+    },
+    heatLayer: () => ({
+      addTo: function() { return this; },
+      setLatLngs: function() { return this; },
+      setOptions: function() { return this; }
+    })
+  };
+  const mockChart = function() {
+    return { data: { datasets: [], labels: [] }, update: () => {} };
+  };
+  mockChart.defaults = { font: {} };
+  const uiCtx = {
+    window: { addEventListener: () => {}, setTimeout: fn => fn() },
+    document: mockDoc,
+    L: mockL,
+    Chart: mockChart,
+    Math,
+    JSON,
+    parseFloat,
+    parseInt,
+    isFinite,
+    console,
+    setTimeout: fn => fn()
+  };
+  vm.createContext(uiCtx);
+  vm.runInContext(grab('data') + grab('engine') + grab('ui'), uiCtx);
+  
+  // Exercise interactions
+  vm.runInContext('setCoord(19.2, -70.5); setR(0.95); updateHeatmap();', uiCtx);
+  console.log('PASS: script id="ui" ejecutado con exito (render(), setCoord(), setR(), updateHeatmap() OK)');
+} catch (err) {
+  console.error('FAIL: script id="ui" arrojo error:', err);
+  fails++;
+}
+
 process.exit(fails ? 1 : 0);
