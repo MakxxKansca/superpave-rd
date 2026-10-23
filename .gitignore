@@ -1,0 +1,17 @@
+# Dependencies & Environment
+node_modules/
+.npm/
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# OS and IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# Legacy Colab exports (not needed for standalone workbench)
+PG de República Dominicana_files/
+PG de República Dominicana.html

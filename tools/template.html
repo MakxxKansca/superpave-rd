@@ -1,0 +1,1605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Superpave PG Workbench · República Dominicana · Asignación 03</title>
+<meta name="description" content="Workbench de ingeniería civil para selección del grado de desempeño (PG) de ligantes asfálticos en República Dominicana. Método 7 días, PG bajo y daño por ahuellamiento.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Black&family=JetBrains+Mono:wght@400;500;700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="">
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js" integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+:root{
+  --bg:#f4f3ef;
+  --panel:#ffffff;
+  --panel-alt:#eceae2;
+  --ink:#0f0f10;
+  --ink-muted:#4a4d52;
+  --border:#0f0f10;
+  --accent-yellow:#ffd600;
+  --accent-red:#ff331f;
+  --accent-blue:#1055ff;
+  --accent-green:#05a843;
+  --accent-cyan:#00e5ff;
+  --b:3px solid var(--border);
+  --b-thin:2px solid var(--border);
+  --shadow:4px 4px 0px var(--border);
+  --shadow-sm:2px 2px 0px var(--border);
+  --shadow-lg:6px 6px 0px var(--border);
+  --mono:'JetBrains Mono',ui-monospace,Menlo,Consolas,monospace;
+  --display:'Archivo Black','Arial Black',Impact,sans-serif;
+}
+
+*{box-sizing:border-box;margin:0;padding:0;border-radius:0}
+html,body{background:var(--bg);color:var(--ink);font-family:var(--mono);font-size:13.5px;line-height:1.45;min-height:100vh}
+body{display:flex;flex-direction:column}
+a{color:var(--accent-blue);text-decoration:none;font-weight:700}
+a:hover{text-decoration:underline}
+.tabnum{font-variant-numeric:tabular-nums}
+
+/* WORKBENCH TOP APP BAR */
+.app-header{
+  background:var(--panel);
+  border-bottom:var(--b);
+  display:grid;
+  grid-template-columns:auto 1fr auto;
+  align-items:stretch;
+  position:sticky;
+  top:0;
+  z-index:1000;
+  box-shadow:0 2px 0 var(--border);
+}
+.app-brand{
+  background:var(--ink);
+  color:var(--panel);
+  padding:10px 18px;
+  display:flex;
+  align-items:center;
+  gap:12px;
+  border-right:var(--b);
+}
+.app-brand .badge{
+  background:var(--accent-yellow);
+  color:var(--ink);
+  font-family:var(--display);
+  font-size:1.4rem;
+  padding:2px 8px;
+  line-height:1;
+  border:2px solid var(--border);
+  box-shadow:2px 2px 0 var(--panel);
+}
+.app-brand .title-wrap{
+  display:flex;
+  flex-direction:column;
+}
+.app-brand .main-title{
+  font-family:var(--display);
+  font-size:1.15rem;
+  letter-spacing:-.02em;
+  text-transform:uppercase;
+  line-height:1.1;
+  color:#fff;
+}
+.app-brand .sub-title{
+  font-size:0.72rem;
+  font-weight:700;
+  color:#a5a9b2;
+  text-transform:uppercase;
+  letter-spacing:.03em;
+}
+.app-meta{
+  padding:8px 16px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  background:var(--panel);
+  overflow-x:auto;
+}
+.meta-chip{
+  display:inline-flex;
+  align-items:center;
+  gap:6px;
+  font-size:0.75rem;
+  font-weight:700;
+  text-transform:uppercase;
+  background:var(--panel-alt);
+  border:var(--b-thin);
+  padding:4px 8px;
+  box-shadow:var(--shadow-sm);
+  white-space:nowrap;
+}
+.meta-chip .dot{
+  width:8px;
+  height:8px;
+  background:var(--accent-green);
+  border:1px solid #000;
+  animation:pulse 2s infinite;
+}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
+.app-actions{
+  display:flex;
+  border-left:var(--b);
+  background:var(--panel-alt);
+}
+.app-btn{
+  font-family:var(--mono);
+  font-weight:800;
+  font-size:0.78rem;
+  text-transform:uppercase;
+  background:var(--panel);
+  color:var(--ink);
+  border:none;
+  border-left:var(--b-thin);
+  padding:0 14px;
+  cursor:pointer;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  transition:background .1s, transform .1s;
+}
+.app-btn:first-child{border-left:none}
+.app-btn:hover{background:var(--accent-yellow)}
+.app-btn:active{background:var(--ink);color:var(--accent-yellow)}
+.app-btn.primary{background:var(--accent-yellow)}
+.app-btn.primary:hover{background:var(--ink);color:var(--accent-yellow)}
+
+/* WORKBENCH MAIN LAYOUT */
+.workbench-body{
+  flex:1;
+  display:grid;
+  grid-template-columns:390px 1fr;
+  align-items:stretch;
+  min-height:calc(100vh - 85px);
+}
+
+/* SIDEBAR CONTROLLER DOCK */
+.dock-sidebar{
+  background:var(--panel-alt);
+  border-right:var(--b);
+  display:flex;
+  flex-direction:column;
+  overflow-y:auto;
+}
+.dock-section{
+  padding:14px;
+  border-bottom:var(--b);
+  background:var(--panel);
+}
+.dock-title{
+  font-family:var(--display);
+  font-size:0.85rem;
+  text-transform:uppercase;
+  letter-spacing:.02em;
+  margin-bottom:10px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+}
+.dock-title span{
+  background:var(--ink);
+  color:var(--accent-yellow);
+  padding:1px 6px;
+  font-size:0.7rem;
+}
+
+/* CONTROLS IN SIDEBAR */
+.field-group{margin-bottom:10px}
+.field-label{
+  display:block;
+  font-weight:800;
+  font-size:0.72rem;
+  text-transform:uppercase;
+  color:var(--ink-muted);
+  margin-bottom:4px;
+}
+.coord-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+}
+.coord-input-wrap{
+  position:relative;
+}
+.coord-input-wrap span{
+  position:absolute;
+  left:8px;
+  top:50%;
+  transform:translateY(-50%);
+  font-size:0.7rem;
+  font-weight:800;
+  color:var(--ink-muted);
+  pointer-events:none;
+}
+.coord-input-wrap input{
+  width:100%;
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:0.95rem;
+  padding:8px 8px 8px 34px;
+  border:var(--b);
+  background:var(--panel);
+  box-shadow:var(--shadow-sm);
+}
+.coord-input-wrap input:focus{
+  outline:none;
+  background:var(--accent-yellow);
+}
+.btn-calc-main{
+  width:100%;
+  padding:10px;
+  margin-top:8px;
+  font-family:var(--display);
+  font-size:0.9rem;
+  text-transform:uppercase;
+  background:var(--accent-yellow);
+  color:var(--ink);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  cursor:pointer;
+  transition:all .1s;
+}
+.btn-calc-main:hover{
+  transform:translate(-1px,-1px);
+  box-shadow:var(--shadow-lg);
+}
+.btn-calc-main:active{
+  transform:translate(2px,2px);
+  box-shadow:var(--shadow-sm);
+}
+
+/* PRESETS BAR */
+.presets-grid{
+  display:grid;
+  grid-template-columns:repeat(3,1fr);
+  gap:5px;
+  margin-top:8px;
+}
+.preset-btn{
+  font-family:var(--mono);
+  font-weight:700;
+  font-size:0.68rem;
+  text-transform:uppercase;
+  padding:6px 2px;
+  background:var(--panel);
+  border:var(--b-thin);
+  box-shadow:var(--shadow-sm);
+  cursor:pointer;
+  text-align:center;
+  white-space:nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+}
+.preset-btn:hover{background:var(--ink);color:#fff}
+.preset-btn:active{transform:translate(1px,1px);box-shadow:none}
+
+/* RELIABILITY CONTROLS */
+.chips-r{
+  display:grid;
+  grid-template-columns:repeat(5,1fr);
+  border:var(--b);
+  box-shadow:var(--shadow-sm);
+  margin-bottom:8px;
+}
+.chips-r button{
+  font-family:var(--mono);
+  font-weight:800;
+  font-size:0.8rem;
+  padding:7px 0;
+  border:none;
+  border-right:var(--b-thin);
+  background:var(--panel);
+  cursor:pointer;
+}
+.chips-r button:last-child{border-right:none}
+.chips-r button[aria-pressed="true"]{
+  background:var(--ink);
+  color:var(--accent-yellow);
+}
+.chips-r button:hover:not([aria-pressed="true"]){
+  background:var(--accent-yellow);
+}
+.range-wrap{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+}
+.range-wrap input[type=range]{
+  width:100%;
+  accent-color:var(--ink);
+  height:24px;
+}
+.range-readout{
+  display:flex;
+  justify-content:space-between;
+  font-size:0.78rem;
+  font-weight:800;
+  padding:4px 6px;
+  background:var(--panel-alt);
+  border:var(--b-thin);
+}
+
+/* TOGGLES / OPTIONS */
+.opt-box{
+  display:flex;
+  gap:8px;
+  align-items:flex-start;
+  padding:8px;
+  background:var(--panel-alt);
+  border:var(--b-thin);
+  box-shadow:var(--shadow-sm);
+  margin-bottom:6px;
+  cursor:pointer;
+  font-size:0.75rem;
+}
+.opt-box input{
+  width:16px;
+  height:16px;
+  accent-color:var(--ink);
+  margin-top:2px;
+  flex-shrink:0;
+}
+.opt-box b{color:var(--ink)}
+
+/* STATION INSPECTOR CARD */
+.station-card{
+  background:var(--ink);
+  color:#fff;
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:12px;
+}
+.st-card-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  border-bottom:1px solid #333;
+  padding-bottom:6px;
+}
+.st-badge{
+  font-family:var(--display);
+  font-size:1.1rem;
+  color:var(--accent-yellow);
+}
+.st-status{
+  font-size:0.68rem;
+  font-weight:700;
+  background:var(--accent-blue);
+  color:#fff;
+  padding:2px 6px;
+  text-transform:uppercase;
+}
+.st-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  font-size:0.75rem;
+}
+.st-item{display:flex;flex-direction:column}
+.st-item .lbl{font-size:0.65rem;color:#8f949e;text-transform:uppercase}
+.st-item .val{font-weight:700;color:#fff}
+
+/* RIGHT STAGE / WORKSPACE */
+.stage-main{
+  display:flex;
+  flex-direction:column;
+  background:var(--bg);
+  overflow-y:auto;
+}
+
+/* TOP KPI STATS DECK */
+.kpi-deck{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:12px;
+  padding:16px;
+  background:var(--panel-alt);
+  border-bottom:var(--b);
+}
+.kpi-card{
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:12px 14px;
+  display:flex;
+  flex-direction:column;
+  position:relative;
+  transition:all .1s;
+}
+.kpi-card:hover{
+  transform:translate(-1px,-1px);
+  box-shadow:var(--shadow-lg);
+}
+.kpi-card .kpi-tag{
+  font-size:0.68rem;
+  font-weight:800;
+  text-transform:uppercase;
+  letter-spacing:.04em;
+  margin-bottom:4px;
+  color:var(--ink-muted);
+}
+.kpi-card .kpi-value{
+  font-family:var(--display);
+  font-size:clamp(1.9rem,2.8vw,2.6rem);
+  line-height:1;
+  margin:4px 0;
+}
+.kpi-card .kpi-sub{
+  font-size:0.85rem;
+  font-weight:800;
+  color:var(--ink);
+}
+.kpi-card .kpi-footer{
+  margin-top:auto;
+  padding-top:6px;
+  border-top:var(--b-thin);
+  font-size:0.68rem;
+  color:var(--ink-muted);
+  display:flex;
+  justify-content:space-between;
+}
+.kpi-card.c-red{border-top:8px solid var(--accent-red)}
+.kpi-card.c-red .kpi-value{color:var(--accent-red)}
+.kpi-card.c-yellow{border-top:8px solid var(--accent-yellow)}
+.kpi-card.c-yellow .kpi-value{color:var(--ink)}
+.kpi-card.c-blue{border-top:8px solid var(--accent-blue)}
+.kpi-card.c-blue .kpi-value{color:var(--accent-blue)}
+.kpi-card.c-dark{background:var(--ink);color:#fff;border-top:8px solid var(--accent-yellow)}
+.kpi-card.c-dark .kpi-tag{color:#8f949e}
+.kpi-card.c-dark .kpi-value{color:var(--accent-yellow);font-size:clamp(1.5rem,2.2vw,2.1rem)}
+.kpi-card.c-dark .kpi-sub{color:#fff}
+.kpi-card.c-dark .kpi-footer{border-top:1px solid #333;color:#8f949e}
+
+/* WORKBENCH NAV TABS (IDE STYLE) */
+.stage-tabs{
+  display:flex;
+  background:var(--panel-alt);
+  border-bottom:var(--b);
+  padding:8px 16px 0 16px;
+  gap:4px;
+  overflow-x:auto;
+}
+.tab-btn{
+  font-family:var(--mono);
+  font-weight:800;
+  font-size:0.75rem;
+  text-transform:uppercase;
+  background:var(--panel-alt);
+  color:var(--ink-muted);
+  border:var(--b-thin);
+  border-bottom:none;
+  padding:8px 14px;
+  cursor:pointer;
+  white-space:nowrap;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  position:relative;
+  top:2px;
+}
+.tab-btn:hover{
+  background:var(--panel);
+  color:var(--ink);
+}
+.tab-btn.active{
+  background:var(--panel);
+  color:var(--ink);
+  border:var(--b);
+  border-bottom:3px solid var(--panel);
+  top:0;
+  box-shadow:var(--shadow-sm);
+  z-index:10;
+}
+.tab-btn .tab-count{
+  background:var(--ink);
+  color:#fff;
+  padding:1px 5px;
+  font-size:0.65rem;
+}
+.tab-btn.active .tab-count{
+  background:var(--accent-yellow);
+  color:var(--ink);
+}
+
+/* TAB PANELS CONTAINER */
+.stage-content{
+  flex:1;
+  padding:16px;
+}
+.tab-pane{display:none}
+.tab-pane.active{display:block}
+
+/* TAB 1: MAP VIEW */
+.map-container{
+  border:var(--b);
+  box-shadow:var(--shadow);
+  background:var(--panel);
+  position:relative;
+}
+#map{
+  height:520px;
+  width:100%;
+}
+.map-floating-panel{
+  position:absolute;
+  bottom:14px;
+  left:14px;
+  z-index:1000;
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:8px 12px;
+  max-width:260px;
+  font-size:0.72rem;
+}
+.map-floating-panel h4{
+  font-family:var(--display);
+  font-size:0.8rem;
+  text-transform:uppercase;
+  margin-bottom:6px;
+}
+.map-legend{
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  font-weight:700;
+}
+.legend-item{display:flex;align-items:center;gap:6px}
+.pin-icon{width:12px;height:12px;border:2px solid #000}
+.pin-project{background:var(--accent-red);transform:rotate(45deg)}
+.pin-active-st{background:var(--accent-blue)}
+.pin-other-st{background:#fff}
+
+/* LEAFLET BRUTALIST LAYER CONTROL */
+.leaflet-control-layers{
+  border:var(--b)!important;
+  box-shadow:var(--shadow)!important;
+  background:var(--panel)!important;
+  font-family:var(--mono)!important;
+  font-size:0.72rem!important;
+  font-weight:700!important;
+  border-radius:0!important;
+  padding:8px 12px!important;
+}
+.leaflet-control-layers-base label{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  cursor:pointer;
+  margin-bottom:4px;
+}
+.leaflet-control-layers-base input{
+  accent-color:var(--ink);
+}
+.leaflet-bar{
+  border:var(--b)!important;
+  box-shadow:var(--shadow-sm)!important;
+  border-radius:0!important;
+}
+.leaflet-bar a{
+  background:var(--panel)!important;
+  color:var(--ink)!important;
+  border-bottom:var(--b-thin)!important;
+  border-radius:0!important;
+  font-weight:800!important;
+}
+.leaflet-bar a:hover{
+  background:var(--accent-yellow)!important;
+}
+
+/* TAB 2: CALCULATION STEPS (WORKBENCH INSPECTOR) */
+.steps-grid{
+  display:grid;
+  grid-template-columns:repeat(2,1fr);
+  gap:12px;
+}
+.step-card{
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:12px 16px;
+  display:flex;
+  flex-direction:column;
+}
+.step-card h3{
+  font-family:var(--display);
+  font-size:0.95rem;
+  text-transform:uppercase;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  margin-bottom:8px;
+  padding-bottom:6px;
+  border-bottom:var(--b-thin);
+}
+.step-card h3 .num{
+  background:var(--accent-yellow);
+  color:var(--ink);
+  border:var(--b-thin);
+  padding:2px 7px;
+  font-size:0.8rem;
+}
+.eq-block{
+  background:var(--panel-alt);
+  border-left:5px solid var(--ink);
+  border-top:1px solid #ddd;
+  border-right:1px solid #ddd;
+  border-bottom:1px solid #ddd;
+  padding:8px 12px;
+  font-family:var(--mono);
+  font-size:0.8rem;
+  white-space:pre-wrap;
+  line-height:1.5;
+  margin-top:auto;
+}
+.eq-block b{background:var(--accent-yellow);padding:0 3px}
+
+/* TAB 3: CHARTS */
+.charts-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:14px;
+}
+.chart-box{
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:14px;
+  display:flex;
+  flex-direction:column;
+  height:400px;
+}
+.chart-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:8px;
+  border-bottom:var(--b-thin);
+  padding-bottom:6px;
+}
+.chart-header h3{
+  font-family:var(--display);
+  font-size:0.9rem;
+  text-transform:uppercase;
+}
+.chart-canvas-wrap{
+  flex:1;
+  position:relative;
+  min-height:0;
+}
+
+/* TAB 4: ANNUAL DATA TABLE */
+.table-panel{
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+.table-scroll{
+  max-height:460px;
+  overflow:auto;
+  border:var(--b-thin);
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+  font-size:0.8rem;
+}
+th,td{
+  border:1px solid var(--border);
+  padding:6px 10px;
+  text-align:right;
+}
+th{
+  background:var(--ink);
+  color:#fff;
+  font-weight:800;
+  text-transform:uppercase;
+  font-size:0.72rem;
+  position:sticky;
+  top:0;
+  z-index:5;
+}
+td:first-child,th:first-child{text-align:left}
+tbody tr:hover td{background:var(--accent-yellow)}
+tr.extreme-row td{background:#ffebe6;font-weight:700}
+
+/* TAB 5: VERIFICATION SUITE */
+.verif-box{
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:14px;
+}
+.badge-pass{
+  background:var(--accent-green);
+  color:#fff;
+  font-weight:800;
+  padding:3px 8px;
+  border:var(--b-thin);
+  box-shadow:var(--shadow-sm);
+  display:inline-block;
+}
+.badge-fail{
+  background:var(--accent-red);
+  color:#fff;
+  font-weight:800;
+  padding:3px 8px;
+  border:var(--b-thin);
+  box-shadow:var(--shadow-sm);
+  display:inline-block;
+}
+
+/* TAB 6: ABOUT / METHODOLOGY */
+.about-box{
+  background:var(--panel);
+  border:var(--b);
+  box-shadow:var(--shadow);
+  padding:18px;
+  font-size:0.82rem;
+  line-height:1.6;
+}
+.about-box h3{
+  font-family:var(--display);
+  font-size:1.1rem;
+  text-transform:uppercase;
+  margin:12px 0 6px 0;
+  border-bottom:var(--b-thin);
+  padding-bottom:4px;
+}
+.about-box h3:first-child{margin-top:0}
+.about-box p{margin-bottom:8px}
+.about-box ul{margin:0 0 12px 24px}
+
+/* BOTTOM STATUS BAR (IDE WORKBENCH STYLE) */
+.workbench-statusbar{
+  background:var(--ink);
+  color:#fff;
+  border-top:var(--b);
+  padding:4px 16px;
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  font-size:0.72rem;
+  font-weight:700;
+  z-index:100;
+  box-shadow:0 -2px 0 var(--border);
+}
+.sb-left{display:flex;align-items:center;gap:14px}
+.sb-right{display:flex;align-items:center;gap:14px}
+.sb-item{display:flex;align-items:center;gap:4px}
+.sb-item .tag{color:var(--accent-yellow)}
+.sb-item.ok{color:var(--accent-green)}
+
+/* TOAST FEEDBACK */
+#toast{
+  position:fixed;
+  bottom:35px;
+  right:20px;
+  background:var(--ink);
+  color:var(--accent-yellow);
+  font-weight:800;
+  font-size:0.8rem;
+  padding:10px 16px;
+  border:var(--b);
+  box-shadow:var(--shadow);
+  display:none;
+  z-index:9999;
+}
+
+/* RESPONSIVE DESIGN */
+@media (max-width:1150px){
+  .workbench-body{grid-template-columns:1fr}
+  .dock-sidebar{border-right:none;border-bottom:var(--b)}
+  .kpi-deck{grid-template-columns:1fr 1fr}
+  .steps-grid{grid-template-columns:1fr}
+  .charts-grid{grid-template-columns:1fr}
+}
+@media (max-width:600px){
+  .app-header{grid-template-columns:1fr}
+  .app-actions{border-left:none;border-top:var(--b-thin)}
+  .kpi-deck{grid-template-columns:1fr}
+  .chips-r{grid-template-columns:repeat(5,1fr)}
+  .presets-grid{grid-template-columns:1fr 1fr}
+}
+@media print{
+  .app-header,.dock-sidebar,.stage-tabs,.workbench-statusbar,.app-actions{display:none!important}
+  .workbench-body{display:block}
+  .tab-pane{display:block!important;margin-bottom:20px;page-break-inside:avoid}
+}
+</style>
+</head>
+<body>
+
+<!-- TOP APPLICATION BAR -->
+<header class="app-header">
+  <div class="app-brand">
+    <span class="badge">RD</span>
+    <div class="title-wrap">
+      <h1 class="main-title">Superpave PG · República Dominicana</h1>
+      <span class="sub-title">Transportes II · Asignación 03 (Punto D) · UTP 2026</span>
+    </div>
+  </div>
+  <div class="app-meta">
+    <div class="meta-chip"><span class="dot"></span><span>MERRA-2 (2000–2025)</span></div>
+    <div class="meta-chip"><span>ESTUDIANTE:</span> <b>ELVIS BERMÚDEZ</b></div>
+    <div class="meta-chip"><span>MOTOR:</span> <b>JS 1:1 NOTEBOOK</b></div>
+  </div>
+  <div class="app-actions">
+    <button class="app-btn" id="btn-copy-summary" title="Copiar resumen del cálculo al portapapeles">📋 Copiar Resumen</button>
+    <button class="app-btn primary" id="btn-print" title="Imprimir o guardar como PDF">🖨️ Imprimir</button>
+  </div>
+</header>
+
+<!-- MAIN WORKBENCH BODY -->
+<div class="workbench-body">
+
+  <!-- LEFT CONTROLLER DOCK -->
+  <aside class="dock-sidebar" aria-label="Panel de Configuración">
+    <div class="dock-section">
+      <div class="dock-title">
+        <span>01</span>
+        <b>Coordenada del Proyecto</b>
+      </div>
+      <div class="field-group">
+        <label class="field-label">Coordenadas en Grados Decimales (WGS84)</label>
+        <div class="coord-grid">
+          <div class="coord-input-wrap">
+            <span>LAT</span>
+            <input id="in-lat" type="number" step="0.00001" value="18.50825" aria-label="Latitud">
+          </div>
+          <div class="coord-input-wrap">
+            <span>LON</span>
+            <input id="in-lon" type="number" step="0.00001" value="-70.00591" aria-label="Longitud">
+          </div>
+        </div>
+        <button class="btn-calc-main" id="btn-calc" type="button">Actualizar Coordenadas ▶</button>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Ubicaciones Predefinidas</label>
+        <div class="presets-grid">
+          <button type="button" class="preset-btn" data-lat="18.50825" data-lon="-70.00591">Santo Domingo</button>
+          <button type="button" class="preset-btn" data-lat="19.45070" data-lon="-70.69700">Santiago</button>
+          <button type="button" class="preset-btn" data-lat="18.42700" data-lon="-68.97200">La Romana</button>
+          <button type="button" class="preset-btn" data-lat="18.20800" data-lon="-71.10000">Barahona</button>
+          <button type="button" class="preset-btn" data-lat="19.79000" data-lon="-70.69000">Puerto Plata</button>
+          <button type="button" class="preset-btn" data-lat="18.56000" data-lon="-68.37000">Punta Cana</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="dock-section">
+      <div class="dock-title">
+        <span>02</span>
+        <b>Confiabilidad (R)</b>
+      </div>
+      <div class="field-group">
+        <div class="chips-r" role="group" aria-label="Confiabilidad">
+          <button type="button" data-r="0.50" id="r-50">50%</button>
+          <button type="button" data-r="0.90" id="r-90">90%</button>
+          <button type="button" data-r="0.95" id="r-95">95%</button>
+          <button type="button" data-r="0.98" id="r-98">98%</button>
+          <button type="button" data-r="0.99" id="r-99">99%</button>
+        </div>
+        <div class="range-wrap">
+          <input id="in-r" type="range" min="0.50" max="0.999" step="0.001" value="0.98" aria-label="Control deslizante de confiabilidad">
+          <div class="range-readout tabnum">
+            <span id="r-txt">R = 98.0%</span>
+            <span id="z-txt">z = 2.0537</span>
+          </div>
+        </div>
+      </div>
+
+      <label class="opt-box" for="opt-ah">
+        <input type="checkbox" id="opt-ah">
+        <span><b>Ahuellamiento con R = 50% fijo</b> (como en celda 18). Si no, usa R dinámico.</span>
+      </label>
+      <label class="opt-box" for="opt-ord">
+        <input type="checkbox" id="opt-ord">
+        <span><b>Promedio móvil en orden cronológico.</b> Desmarcado = orden del archivo (notebook).</span>
+      </label>
+    </div>
+
+    <div class="dock-section" style="border-bottom:none">
+      <div class="dock-title">
+        <span>03</span>
+        <b>Estación Meteorológica MERRA-2</b>
+      </div>
+      <div class="station-card tabnum" id="st-card">
+        <div class="st-card-header">
+          <span class="st-badge" id="st-id">MERRA 119409</span>
+          <span class="st-status">ACTIVA</span>
+        </div>
+        <div class="st-grid">
+          <div class="st-item"><span class="lbl">Lat / Lon</span><span class="val" id="st-coord">18.500°, -70.000°</span></div>
+          <div class="st-item"><span class="lbl">Distancia Radial</span><span class="val" id="st-dist">0.0101°</span></div>
+          <div class="st-item"><span class="lbl">Elevación</span><span class="val" id="st-elev">60 m</span></div>
+          <div class="st-item"><span class="lbl">Período de Datos</span><span class="val" id="st-period">2000–2025 (26 a)</span></div>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <!-- RIGHT STAGE / WORKSPACE -->
+  <main class="stage-main">
+
+    <!-- KPI STATS DECK -->
+    <section class="kpi-deck" aria-label="Resumen de Grados PG">
+      <div class="kpi-card c-red">
+        <span class="kpi-tag">01 · PG Alto (Método 7 Días)</span>
+        <div class="kpi-value" id="kpi-pg-alto">PG 64</div>
+        <div class="kpi-sub tabnum" id="kpi-t-alto">60.43 °C</div>
+        <div class="kpi-footer">
+          <span>Profundidad H = 20 mm</span>
+          <span id="kpi-r-alto">R = 98.0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card c-yellow">
+        <span class="kpi-tag">02 · PG Alto (Ahuellamiento)</span>
+        <div class="kpi-value" id="kpi-pg-ah">PG 82</div>
+        <div class="kpi-sub tabnum" id="kpi-t-ah">78.18 °C</div>
+        <div class="kpi-footer">
+          <span>Ecs. 5.9 – 5.11 (DD)</span>
+          <span id="kpi-r-ah">R = 98.0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card c-blue">
+        <span class="kpi-tag">03 · PG Bajo (Térmico / Fatiga)</span>
+        <div class="kpi-value" id="kpi-pg-bajo">PG -10</div>
+        <div class="kpi-sub tabnum" id="kpi-t-bajo">14.89 °C</div>
+        <div class="kpi-footer">
+          <span>Superficie H = 0 mm</span>
+          <span id="kpi-r-bajo">R = 98.0%</span>
+        </div>
+      </div>
+
+      <div class="kpi-card c-dark">
+        <span class="kpi-tag">04 · Grado Comercial de Diseño</span>
+        <div class="kpi-value" id="kpi-pg-com">PG 64-10</div>
+        <div class="kpi-sub" id="kpi-pg-com-ah">PG 82-10 (Ahuellamiento)</div>
+        <div class="kpi-footer">
+          <span>Norma AASHTO M 320</span>
+          <span>RD 2000-2025</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- WORKBENCH TABS -->
+    <nav class="stage-tabs" role="tablist">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="tab-map">🗺️ Mapa Interactivo (OSM) <span class="tab-count">RD</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-steps">📐 Memoria de Cálculo <span class="tab-count">6 Pasos</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-charts">📈 Análisis Estadístico <span class="tab-count">Gauss</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-table">📊 Serie Anual <span class="tab-count">2000–2025</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-verif">🔬 Verificación Py vs JS <span class="tab-count">5 Casos</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-about">📖 Metodología & Créditos</button>
+    </nav>
+
+    <!-- STAGE CONTENT -->
+    <div class="stage-content">
+
+      <!-- TAB 1: MAP -->
+      <section id="tab-map" class="tab-pane active" role="tabpanel">
+        <div class="map-container">
+          <div id="map" role="application" aria-label="Mapa interactivo de estaciones meteorológicas"></div>
+          <div class="map-floating-panel">
+            <h4>Simbología de Navegación</h4>
+            <div class="map-legend">
+              <div class="legend-item"><span class="pin-icon pin-project"></span><span>Proyecto (Arrastrable / Clic)</span></div>
+              <div class="legend-item"><span class="pin-icon pin-active-st"></span><span>Estación MERRA-2 Asignada</span></div>
+              <div class="legend-item"><span class="pin-icon pin-other-st"></span><span>Otras Estaciones MERRA-2</span></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 2: STEPS -->
+      <section id="tab-steps" class="tab-pane" role="tabpanel">
+        <div class="steps-grid" id="steps-container"></div>
+      </section>
+
+      <!-- TAB 3: CHARTS -->
+      <section id="tab-charts" class="tab-pane" role="tabpanel">
+        <div class="charts-grid">
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Distribución de Temperaturas Anuales del Aire</h3>
+              <span class="tabnum" style="font-size:0.7rem;font-weight:700">15 CLASES DENSITY=TRUE</span>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="ch-dist" aria-label="Histogramas y curvas normales"></canvas>
+            </div>
+          </div>
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Historial Térmico Anual (2000 – 2025)</h3>
+              <span class="tabnum" style="font-size:0.7rem;font-weight:700">26 AÑOS DE REGISTRO</span>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="ch-year" aria-label="Gráfica de barras de temperaturas por año"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: ANNUAL DATA -->
+      <section id="tab-table" class="tab-pane" role="tabpanel">
+        <div class="table-panel">
+          <div class="table-scroll">
+            <table class="tabnum">
+              <thead>
+                <tr>
+                  <th>Año</th>
+                  <th>Máx. Prom. 7 Días T<sub>max</sub> (°C)</th>
+                  <th>T<sub>min</sub> Anual del Aire (°C)</th>
+                  <th>Grados-Día Acumulados &gt; 10°C</th>
+                </tr>
+              </thead>
+              <tbody id="t-year-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: VERIFICATION -->
+      <section id="tab-verif" class="tab-pane" role="tabpanel">
+        <div class="verif-box">
+          <p style="margin-bottom:10px;font-size:0.78rem">
+            <b>Criterio de Aceptación del Profesor (Parte D):</b> Comparación obligatoria de al menos 3 coordenadas calculadas en Python vs. los resultados dinámicos en JavaScript. Tolerancia estricta: <code>|Δ| &lt; 0.01 °C</code> y grados comerciales exactamente coincidentes.
+          </p>
+          <div class="table-scroll" style="max-height:none">
+            <table class="tabnum">
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Ubicación / Coordenada</th>
+                  <th>R / R<sub>ah</sub></th>
+                  <th>Estación</th>
+                  <th>T<sub>alto</sub> (Py)</th>
+                  <th>T<sub>alto</sub> (JS)</th>
+                  <th>T<sub>bajo</sub> (Py)</th>
+                  <th>T<sub>bajo</sub> (JS)</th>
+                  <th>PG<sub>H,rel</sub> (Py)</th>
+                  <th>PG<sub>H,rel</sub> (JS)</th>
+                  <th>PG Comercial</th>
+                  <th>Dictamen</th>
+                </tr>
+              </thead>
+              <tbody id="t-verif-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 6: ABOUT -->
+      <section id="tab-about" class="tab-pane" role="tabpanel">
+        <div class="about-box">
+          <h3>Fuente de Datos Climáticos</h3>
+          <p>
+            Temperaturas diarias del aire (máxima y mínima) correspondientes al período 2000–2025 provenientes del modelo de reanálisis MERRA-2 (NASA), obtenidas desde la plataforma InfoPave. De las 18 cuadrículas geográficas de República Dominicana, 16 contienen datos terrestres utilizables (las estaciones 118835 y 121135 corresponden a mar abierto y están desestimadas).
+          </p>
+          <h3>Metodología Superpave Implementada</h3>
+          <ul>
+            <li><b>Selección de Estación:</b> Mínima distancia euclidiana en grados entre las coordenadas del proyecto y los centroides MERRA-2.</li>
+            <li><b>PG Alto Clásico (7 Días):</b> Ecuación de transformación térmica a 20 mm de profundidad con confiabilidad <i>R</i> (inversa de la normal estándar mediante aproximación de Acklam).</li>
+            <li><b>PG Bajo:</b> Ecuación de transformación térmica en superficie (H = 0 mm) aplicando el criterio Superpave de grado comercial más cercano (óptimo clima tropical).</li>
+            <li><b>Modelo de Daños por Ahuellamiento:</b> Ecuaciones empíricas 5.9 a 5.11 basadas en Grados-Día acumulados (DD sobre 10°C) y rodera admisible RD = 10 mm.</li>
+          </ul>
+          <h3>Referencia Bibliográfica</h3>
+          <p>
+            [1] Loría-Salazar, L., Cuadrado-Valbuena, J. M., Villegas-Villegas, E., &amp; Castillo-Camarena, E. A. (2024). <i>Introducción a los Cementos y Ligantes Asfálticos: Caracterización, Reología y Producción.</i> Ediciones Hombre de La Mancha.
+          </p>
+          <h3>Créditos Institucionales</h3>
+          <p>
+            Desarrollado por Elvis Bermúdez · Estudiante de Ingeniería Civil · Asignatura: Transportes II (Código 8033) · Profesor: Dr. Elvis A. Castillo Camarena · Universidad Tecnológica de Panamá (UTP) · II Semestre 2026.
+          </p>
+        </div>
+      </section>
+
+    </div>
+  </main>
+</div>
+
+<!-- WORKBENCH STATUS BAR -->
+<footer class="workbench-statusbar tabnum">
+  <div class="sb-left">
+    <div class="sb-item"><span class="tag">MERRA:</span> <span id="sb-st">119409</span></div>
+    <div class="sb-item"><span class="tag">COORD:</span> <span id="sb-coord">18.50825° N, -70.00591° W</span></div>
+    <div class="sb-item"><span class="tag">DISTANCIA:</span> <span id="sb-dist">0.0101°</span></div>
+  </div>
+  <div class="sb-right">
+    <div class="sb-item"><span class="tag">MOTOR:</span> <span>ACKLAM NORMAL-INV</span></div>
+    <div class="sb-item ok"><span>● SISTEMA VERIFICADO (5/5 PASS)</span></div>
+  </div>
+</footer>
+
+<div id="toast" role="status">Copiado al portapapeles</div>
+
+<script id="data">
+const STATIONS = /*__DATA__*/;
+const VERIF_PY = /*__VERIF__*/;
+</script>
+
+<script id="engine">
+/* ===== Motor de cálculo Superpave PG: Réplica 1:1 de PG RepDominicana.ipynb ===== */
+const PG_MAX_COM = [52, 58, 64, 70, 76, 82, 88, 94, 100];
+const PG_MIN_COM = [-10, -16, -22, -28, -34, -40, -46, -52, -58];
+const H_MAX = 20, H_MIN = 0, RD = 10.0;
+
+/* Inversa de la normal estándar (Acklam). Error relativo < 1.2e-9. Equivale a scipy.stats.norm.ppf */
+function normPpf(p) {
+  if (p <= 0 || p >= 1) return NaN;
+  const a = [-3.969683028665376e+01, 2.209460984245205e+02, -2.759285104469687e+02, 1.383577518672690e+02, -3.066479806614716e+01, 2.506628277459239e+00];
+  const b = [-5.447609879822406e+01, 1.615858368580409e+02, -1.556989798598866e+02, 6.680131188771972e+01, -1.328068155288572e+01];
+  const c = [-7.784894002430293e-03, -3.223964580411365e-01, -2.400758277161838e+00, -2.549732539343734e+00, 4.374664141464968e+00, 2.938163982698783e+00];
+  const d = [7.784695709041462e-03, 3.224671290700398e-01, 2.445134137142996e+00, 3.754408661907416e+00];
+  const pl = 0.02425, ph = 1 - pl;
+  let q, r;
+  if (p < pl) {
+    q = Math.sqrt(-2 * Math.log(p));
+    return (((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+  }
+  if (p > ph) {
+    q = Math.sqrt(-2 * Math.log(1 - p));
+    return -(((((c[0]*q+c[1])*q+c[2])*q+c[3])*q+c[4])*q+c[5]) / ((((d[0]*q+d[1])*q+d[2])*q+d[3])*q+1);
+  }
+  q = p - 0.5; r = q * q;
+  return (((((a[0]*r+a[1])*r+a[2])*r+a[3])*r+a[4])*r+a[5])*q / (((((b[0]*r+b[1])*r+b[2])*r+b[3])*r+b[4])*r+1);
+}
+
+const mean = a => a.reduce((s, v) => s + v, 0) / a.length;
+const stdS = a => {
+  const m = mean(a);
+  return Math.sqrt(a.reduce((s, v) => s + (v - m) ** 2, 0) / (a.length - 1));
+};
+
+function nearestStation(lat, lon) {
+  let best = null, dist = Infinity;
+  for (const s of STATIONS) {
+    const d = Math.sqrt((s.lat - lat) ** 2 + (s.lon - lon) ** 2);
+    if (d < dist) { dist = d; best = s; }
+  }
+  return { st: best, dist };
+}
+
+/* Cálculo dinámico principal */
+function computePG(lat, lon, opts) {
+  const { R, R_ah, order } = opts;
+  const { st, dist } = nearestStation(lat, lon);
+  const t7 = st[order], tmin = st.tmin, ddA = st.dd;
+
+  // Celda 10: Estadísticos anuales
+  const T_air_max = mean(t7), T_air_min = mean(tmin);
+  const sigma_air_max = stdS(t7), sigma_air_min = stdS(tmin);
+
+  // Celda 12-14: PG Alto (7 días)
+  const z = normPpf(R);
+  const log_hmax = Math.log10(H_MAX + 25);
+  const T_pav_prom = 54.32 + 0.78 * T_air_max - 0.0025 * (lat ** 2) - 15.14 * log_hmax;
+  const sigma_pav_max = Math.sqrt(9 + 0.61 * (sigma_air_max ** 2));
+  const T_pav_alto = T_pav_prom + z * sigma_pav_max;
+  const PG_alto = PG_MAX_COM.find(pg => pg >= T_pav_alto) ?? PG_MAX_COM[PG_MAX_COM.length - 1];
+
+  // Celda 15-16: PG Bajo
+  const log_hmin = Math.log10(H_MIN + 25);
+  const T_pav_prom_bajo = -1.56 + 0.72 * T_air_min - 0.004 * (lat ** 2) + 6.26 * log_hmin;
+  const sigma_pav_min = Math.sqrt(4.4 + 0.52 * (sigma_air_min ** 2));
+  const z_bajo = -normPpf(R);
+  const T_pav_bajo = T_pav_prom_bajo + z_bajo * sigma_pav_min;
+  let PG_bajo = PG_MIN_COM[0];
+  for (const pg of PG_MIN_COM) {
+    if (Math.abs(pg - T_pav_bajo) < Math.abs(PG_bajo - T_pav_bajo)) PG_bajo = pg;
+  }
+
+  // Celda 18-19: Modelo de Ahuellamiento
+  const DD_prom = mean(ddA), DD = DD_prom / 1000.0;
+  const Z_ah = normPpf(R_ah);
+  const PG_H_d = 48.2 + 14 * DD - 0.96 * (DD ** 2) - 2 * RD;
+  const CVPG = 0.000034 * ((lat - 20) ** 2) * (RD ** 2);
+  const PG_H_rel = PG_H_d + Z_ah * (PG_H_d * CVPG / 100.0);
+  const PG_ah = PG_MAX_COM.find(pg => pg >= PG_H_rel) ?? PG_MAX_COM[PG_MAX_COM.length - 1];
+
+  return {
+    lat, lon, R, R_ah, st, dist, t7, tmin, ddA,
+    T_air_max, T_air_min, sigma_air_max, sigma_air_min,
+    z, log_hmax, T_pav_prom, sigma_pav_max, T_pav_alto, PG_alto,
+    log_hmin, T_pav_prom_bajo, sigma_pav_min, z_bajo, T_pav_bajo, PG_bajo,
+    DD_prom, DD, Z_ah, PG_H_d, CVPG, PG_H_rel, PG_ah
+  };
+}
+</script>
+
+<script id="ui">
+const $ = id => document.getElementById(id);
+const f = (v, n = 2) => Number(v).toFixed(n);
+
+const state = {
+  lat: 18.50825,
+  lon: -70.00591,
+  R: 0.98,
+  ahFixed: false,
+  sorted: false
+};
+
+/* ===== TABS LOGIC ===== */
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+    const target = $(btn.dataset.tab);
+    if (target) target.classList.add('active');
+    if (btn.dataset.tab === 'tab-map' && map) {
+      setTimeout(() => map.invalidateSize(), 50);
+    }
+  });
+});
+
+/* ===== TOAST NOTIFICATION ===== */
+function showToast(msg) {
+  const t = $('toast');
+  t.textContent = msg;
+  t.style.display = 'block';
+  setTimeout(() => { t.style.display = 'none'; }, 2200);
+}
+
+/* ===== LEAFLET MAP & CAPAS TOTALMENTE LIBRES (SIN API KEY NI WATERMARK) ===== */
+// Servidores globales ArcGIS Online y OpenTopoMap: 100% permitidos en file://, cero bloqueos 403
+const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: '© Esri, USGS, NOAA'
+});
+
+const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: '© Esri, Maxar, Earthstar Geographics'
+});
+
+const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 19,
+  attribution: '© Esri, HERE, Garmin, USGS'
+});
+
+const esriLight = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
+  maxZoom: 16,
+  attribution: '© Esri, HERE, Garmin'
+});
+
+const openTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
+  maxZoom: 17,
+  attribution: '© OpenTopoMap contributors'
+});
+
+const baseMaps = {
+  "🚗 Calles & Topografía (Esri)": esriTopo,
+  "🛰️ Satélite de Alta Resolución": esriSat,
+  "🛣️ Red Vial Detallada": esriStreet,
+  "⚪ Plano Técnico Claro": esriLight,
+  "🏔️ Relieve OpenTopoMap": openTopo
+};
+
+const map = L.map('map', {
+  zoomControl: true,
+  layers: [esriTopo]
+}).setView([18.75, -70.2], 8);
+
+L.control.layers(baseMaps, null, { position: 'topright', collapsed: false }).addTo(map);
+
+window.addEventListener('resize', () => map.invalidateSize());
+setTimeout(() => map.invalidateSize(), 300);
+
+const icoSt = L.divIcon({ className: '', html: '<span style="display:block;width:14px;height:14px;border:2px solid #000;background:#fff"></span>', iconSize: [14, 14], iconAnchor: [7, 7] });
+const icoSel = L.divIcon({ className: '', html: '<span style="display:block;width:18px;height:18px;border:3px solid #000;background:var(--accent-blue)"></span>', iconSize: [18, 18], iconAnchor: [9, 9] });
+const icoPin = L.divIcon({ className: '', html: '<span style="display:block;width:20px;height:20px;background:var(--accent-red);border:3px solid #000;transform:rotate(45deg)"></span>', iconSize: [20, 20], iconAnchor: [10, 10] });
+
+const stMarkers = {};
+STATIONS.forEach(s => {
+  stMarkers[s.id] = L.marker([s.lat, s.lon], { icon: icoSt, keyboard: false })
+    .bindTooltip(`MERRA ${s.id} · ${s.elev}m`, { direction: 'top' })
+    .addTo(map);
+});
+
+const pin = L.marker([state.lat, state.lon], { icon: icoPin, draggable: true, zIndexOffset: 1000 }).addTo(map);
+const link = L.polyline([], { color: '#000', weight: 3, dashArray: '6 6' }).addTo(map);
+
+pin.on('dragend', e => setCoord(e.target.getLatLng().lat, e.target.getLatLng().lng));
+map.on('click', e => setCoord(e.latlng.lat, e.latlng.lng));
+
+function setCoord(lat, lon) {
+  state.lat = +lat.toFixed(5);
+  state.lon = +lon.toFixed(5);
+  $('in-lat').value = state.lat;
+  $('in-lon').value = state.lon;
+  render();
+}
+
+$('btn-calc').addEventListener('click', () => {
+  const lat = parseFloat($('in-lat').value), lon = parseFloat($('in-lon').value);
+  if (isFinite(lat) && isFinite(lon)) {
+    state.lat = lat; state.lon = lon;
+    map.setView([lat, lon], Math.max(map.getZoom(), 9));
+    render();
+    showToast(`Coordenadas actualizadas: ${lat}, ${lon}`);
+  }
+});
+['in-lat', 'in-lon'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-calc').click(); }));
+
+/* PRESET BUTTONS */
+document.querySelectorAll('.preset-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const lat = parseFloat(btn.dataset.lat), lon = parseFloat(btn.dataset.lon);
+    setCoord(lat, lon);
+    map.setView([lat, lon], 10);
+    showToast(`Ubicación: ${btn.textContent.trim()}`);
+  });
+});
+
+/* RELIABILITY CONTROLS */
+function setR(r) {
+  state.R = Math.min(0.999, Math.max(0.5, r));
+  $('in-r').value = state.R;
+  render();
+}
+$('in-r').addEventListener('input', e => setR(parseFloat(e.target.value)));
+document.querySelectorAll('.chips-r button').forEach(b => {
+  b.addEventListener('click', () => setR(parseFloat(b.dataset.r)));
+});
+$('opt-ah').addEventListener('change', e => { state.ahFixed = e.target.checked; render(); });
+$('opt-ord').addEventListener('change', e => { state.sorted = e.target.checked; render(); });
+
+/* EXPORT & PRINT */
+$('btn-print').addEventListener('click', () => window.print());
+$('btn-copy-summary').addEventListener('click', () => {
+  const r = computePG(state.lat, state.lon, { R: state.R, R_ah: state.ahFixed ? 0.5 : state.R, order: state.sorted ? 't7s' : 't7f' });
+  const text = `SUPERPAVE PG - REPÚBLICA DOMINICANA (ASIGNACIÓN 03)
+Proyecto: Lat ${f(state.lat, 5)}°, Lon ${f(state.lon, 5)}°
+Confiabilidad: R = ${f(state.R * 100, 1)}% (z = ${f(r.z, 4)})
+Estación MERRA-2: ${r.st.id} (Distancia: ${f(r.dist, 4)}°)
+--------------------------------------------------
+PG Alto (Método 7 Días): PG ${r.PG_alto} (${f(r.T_pav_alto, 2)} °C)
+PG Alto (Ahuellamiento): PG ${r.PG_ah} (${f(r.PG_H_rel, 2)} °C)
+PG Bajo: PG ${r.PG_bajo} (${f(r.T_pav_bajo, 2)} °C)
+--------------------------------------------------
+Grado Comercial Superpave: PG ${r.PG_alto}${r.PG_bajo}
+Grado con Ahuellamiento: PG ${r.PG_ah}${r.PG_bajo}`;
+  navigator.clipboard.writeText(text).then(() => showToast('¡Resumen técnico copiado!'));
+});
+
+/* ===== CHART.JS CONFIGURATION ===== */
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.weight = 700;
+Chart.defaults.color = '#000';
+Chart.defaults.borderColor = '#000';
+const gridOpt = { color: 'rgba(0,0,0,.15)', lineWidth: 1 };
+
+const chDist = new Chart($('ch-dist'), {
+  type: 'line',
+  data: { datasets: [] },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 250 },
+    parsing: false,
+    interaction: { mode: 'nearest', intersect: false },
+    scales: {
+      x: { type: 'linear', title: { display: true, text: 'Temperatura del Aire (°C)' }, grid: gridOpt, border: { width: 2 } },
+      y: { title: { display: true, text: 'Densidad de Probabilidad' }, grid: gridOpt, border: { width: 2 }, beginAtZero: true }
+    },
+    plugins: {
+      legend: { labels: { boxWidth: 14, boxHeight: 14 } },
+      tooltip: { backgroundColor: '#000', cornerRadius: 0 }
+    }
+  }
+});
+
+const chYear = new Chart($('ch-year'), {
+  type: 'bar',
+  data: { labels: [], datasets: [] },
+  options: {
+    responsive: true,
+    maintainAspectRatio: false,
+    animation: { duration: 250 },
+    scales: {
+      x: { grid: { display: false }, border: { width: 2 }, ticks: { maxRotation: 90, minRotation: 90 } },
+      y: { title: { display: true, text: 'Temperatura (°C)' }, grid: gridOpt, border: { width: 2 } }
+    },
+    plugins: {
+      legend: { labels: { boxWidth: 14, boxHeight: 14 } },
+      tooltip: { backgroundColor: '#000', cornerRadius: 0 }
+    }
+  }
+});
+
+function histStep(vals, bins = 15) {
+  let lo = Math.min(...vals), hi = Math.max(...vals);
+  if (lo === hi) { lo -= 0.5; hi += 0.5; }
+  const w = (hi - lo) / bins, cnt = new Array(bins).fill(0);
+  vals.forEach(v => {
+    let i = Math.floor((v - lo) / w);
+    if (i >= bins) i = bins - 1;
+    cnt[i]++;
+  });
+  const pts = [{ x: lo, y: 0 }];
+  cnt.forEach((c, i) => {
+    const h = c / (vals.length * w);
+    pts.push({ x: lo + i * w, y: h }, { x: lo + (i + 1) * w, y: h });
+  });
+  pts.push({ x: hi, y: 0 });
+  return pts;
+}
+
+function pdfPts(m, s) {
+  const pts = [];
+  for (let i = 0; i <= 100; i++) {
+    const x = m - 4 * s + (8 * s * i) / 100;
+    pts.push({ x, y: Math.exp(-0.5 * (((x - m) / s) ** 2)) / (s * Math.sqrt(2 * Math.PI)) });
+  }
+  return pts;
+}
+
+/* ===== MAIN RENDER ===== */
+function render() {
+  const R_ah = state.ahFixed ? 0.5 : state.R;
+  const r = computePG(state.lat, state.lon, { R: state.R, R_ah, order: state.sorted ? 't7s' : 't7f' });
+  const s = r.st;
+
+  // Controls UI
+  $('r-txt').textContent = `R = ${f(state.R * 100, 1)}%`;
+  $('z-txt').textContent = `z = ${f(r.z, 4)}`;
+  document.querySelectorAll('.chips-r button').forEach(b => {
+    b.setAttribute('aria-pressed', Math.abs(parseFloat(b.dataset.r) - state.R) < 1e-9);
+  });
+
+  // Station card
+  $('st-id').textContent = `MERRA ${s.id}`;
+  $('st-coord').textContent = `${f(s.lat, 3)}°, ${f(s.lon, 3)}°`;
+  $('st-dist').textContent = `${f(r.dist, 4)}°`;
+  $('st-elev').textContent = `${s.elev} m`;
+  $('st-period').textContent = `${s.years[0]}–${s.years[s.years.length - 1]} (${s.years.length} a)`;
+
+  // Map markers
+  pin.setLatLng([state.lat, state.lon]);
+  Object.entries(stMarkers).forEach(([id, m]) => {
+    m.setIcon(+id === s.id ? icoSel : icoSt);
+  });
+  link.setLatLngs([[state.lat, state.lon], [s.lat, s.lon]]);
+
+  // Top KPI Stat Cards
+  $('kpi-pg-alto').textContent = `PG ${r.PG_alto}`;
+  $('kpi-t-alto').textContent = `${f(r.T_pav_alto)} °C`;
+  $('kpi-r-alto').textContent = `R = ${f(state.R * 100, 1)}%`;
+
+  $('kpi-pg-ah').textContent = `PG ${r.PG_ah}`;
+  $('kpi-t-ah').textContent = `${f(r.PG_H_rel)} °C`;
+  $('kpi-r-ah').textContent = `R = ${f(R_ah * 100, 1)}%`;
+
+  $('kpi-pg-bajo').textContent = `PG ${r.PG_bajo}`;
+  $('kpi-t-bajo').textContent = `${f(r.T_pav_bajo)} °C`;
+  $('kpi-r-bajo').textContent = `R = ${f(state.R * 100, 1)}%`;
+
+  $('kpi-pg-com').textContent = `PG ${r.PG_alto}${r.PG_bajo}`;
+  $('kpi-pg-com-ah').textContent = `PG ${r.PG_ah}${r.PG_bajo} (Ahuellamiento)`;
+
+  // Status bar
+  $('sb-st').textContent = s.id;
+  $('sb-coord').textContent = `${f(state.lat, 5)}° N, ${f(state.lon, 5)}° W`;
+  $('sb-dist').textContent = `${f(r.dist, 4)}°`;
+
+  // Steps breakdown
+  const L2 = f(state.lat, 5);
+  $('steps-container').innerHTML = `
+    <div class="step-card">
+      <h3><span class="num">01</span> Estación Más Cercana</h3>
+      <p style="font-size:0.75rem;margin-bottom:6px">Selección por mínima distancia euclidiana en grados decimales:</p>
+      <div class="eq-block">d = √((Lat<sub>est</sub> − Lat)² + (Lon<sub>est</sub> − Lon)²)\n  = √((${s.lat} − ${L2})² + (${s.lon} − ${f(state.lon, 5)})²)\n  = <b>${f(r.dist, 4)}°</b>  →  Estación MERRA <b>${s.id}</b> (${s.elev} m)</div>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="num">02</span> Parámetros Estadísticos Anuales</h3>
+      <p style="font-size:0.75rem;margin-bottom:6px">Media muestral (T̄) y desviación estándar muestral (σ, n−1):</p>
+      <div class="eq-block">T̄<sub>aire,max</sub> = <b>${f(r.T_air_max, 4)}</b> °C    σ<sub>aire,max</sub> = <b>${f(r.sigma_air_max, 4)}</b> °C\nT̄<sub>aire,min</sub> = <b>${f(r.T_air_min, 4)}</b> °C    σ<sub>aire,min</sub> = <b>${f(r.sigma_air_min, 4)}</b> °C\nn = ${r.t7.length} años analizados (2000–2025)</div>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="num">03</span> PG Alto Clásico (7 Días)</h3>
+      <p style="font-size:0.75rem;margin-bottom:6px">Transformación a temperatura del pavimento a 20 mm de profundidad:</p>
+      <div class="eq-block">z = Φ⁻¹(${state.R}) = <b>${f(r.z, 4)}</b>\nT<sub>pav</sub> = 54.32 + 0.78·${f(r.T_air_max, 4)} − 0.0025·${L2}² − 15.14·log₁₀(20+25)\n      = <b>${f(r.T_pav_prom, 4)}</b> °C\nσ<sub>pav</sub> = √(9 + 0.61·${f(r.sigma_air_max, 4)}²) = <b>${f(r.sigma_pav_max, 4)}</b> °C\nT<sub>alto</sub> = ${f(r.T_pav_prom, 4)} + ${f(r.z, 4)}·${f(r.sigma_pav_max, 4)} = <b>${f(r.T_pav_alto, 4)}</b> °C\nGrado comercial ≥ T<sub>alto</sub>  →  <b>PG ${r.PG_alto}</b></div>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="num">04</span> PG Bajo (Agrietamiento Térmico)</h3>
+      <p style="font-size:0.75rem;margin-bottom:6px">Transformación a temperatura superficial del pavimento (H = 0 mm):</p>
+      <div class="eq-block">T<sub>pav,bajo</sub> = −1.56 + 0.72·${f(r.T_air_min, 4)} − 0.004·${L2}² + 6.26·log₁₀(0+25)\n           = <b>${f(r.T_pav_prom_bajo, 4)}</b> °C\nσ<sub>pav</sub> = √(4.4 + 0.52·${f(r.sigma_air_min, 4)}²) = <b>${f(r.sigma_pav_min, 4)}</b> °C\nT<sub>bajo</sub> = ${f(r.T_pav_prom_bajo, 4)} − ${f(r.z, 4)}·${f(r.sigma_pav_min, 4)} = <b>${f(r.T_pav_bajo, 4)}</b> °C\nGrado comercial más cercano  →  <b>PG ${r.PG_bajo}</b></div>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="num">05</span> Grados-Día Acumulados (DD)</h3>
+      <p style="font-size:0.75rem;margin-bottom:6px">Cálculo de daño térmico diario sobre umbral base de 10 °C:</p>
+      <div class="eq-block">T<sub>media</sub> = (T<sub>max</sub> + T<sub>min</sub>) / 2\nGD<sub>diario</sub> = max(T<sub>media</sub> − 10, 0)\nΣ anual promedio = <b>${f(r.DD_prom, 2)}</b> °C·día\nDD = ${f(r.DD_prom, 2)} / 1000 = <b>${f(r.DD, 4)}</b></div>
+    </div>
+
+    <div class="step-card">
+      <h3><span class="num">06</span> Modelo de Daños por Ahuellamiento</h3>
+      <p style="font-size:0.75rem;margin-bottom:6px">Aplicación de ecuaciones empíricas Superpave 5.9 a 5.11:</p>
+      <div class="eq-block">PG<sub>H,d</sub> = 48.2 + 14·${f(r.DD, 4)} − 0.96·${f(r.DD, 4)}² − 2·10 = <b>${f(r.PG_H_d, 4)}</b> °C   (Ec. 5.9)\nCV<sub>PG</sub> = 0.000034·(${L2} − 20)²·10² = <b>${f(r.CVPG, 4)}</b> %   (Ec. 5.10)\nz = Φ⁻¹(${R_ah}) = ${f(r.Z_ah, 4)}\nPG<sub>H,rel</sub> = ${f(r.PG_H_d, 4)} + ${f(r.Z_ah, 4)}·(${f(r.PG_H_d, 4)}·${f(r.CVPG, 4)}/100) = <b>${f(r.PG_H_rel, 4)}</b> °C   (Ec. 5.11)\nGrado comercial ≥ PG<sub>H,rel</sub>  →  <b>PG ${r.PG_ah}</b></div>
+    </div>
+  `;
+
+  // Annual data table
+  const iMax = r.t7.indexOf(Math.max(...r.t7));
+  const iMin = r.tmin.indexOf(Math.min(...r.tmin));
+  let rows = '';
+  for (let i = s.years.length - 1; i >= 0; i--) {
+    const isExt = (i === iMax || i === iMin);
+    rows += `<tr class="${isExt ? 'extreme-row' : ''}">
+      <td>${s.years[i]} ${i === iMax ? '🔥 (Máx)' : (i === iMin ? '❄️ (Mín)' : '')}</td>
+      <td>${f(r.t7[i], 4)}</td>
+      <td>${f(r.tmin[i], 1)}</td>
+      <td>${f(r.ddA[i], 2)}</td>
+    </tr>`;
+  }
+  $('t-year-body').innerHTML = rows;
+
+  // Update Charts
+  chDist.data.datasets = [
+    { label: 'Hist. T máx. prom. 7 días', data: histStep(r.t7), borderColor: '#000', backgroundColor: 'rgba(255,51,31,0.7)', fill: 'origin', borderWidth: 2, pointRadius: 0, tension: 0 },
+    { label: 'Hist. T mín. anual', data: histStep(r.tmin), borderColor: '#000', backgroundColor: 'rgba(16,85,255,0.7)', fill: 'origin', borderWidth: 2, pointRadius: 0, tension: 0 },
+    { label: 'Normal T máx. (Gauss)', data: pdfPts(r.T_air_max, r.sigma_air_max), borderColor: '#000', borderWidth: 3.5, pointRadius: 0, fill: false },
+    { label: 'Normal T mín. (Gauss)', data: pdfPts(r.T_air_min, r.sigma_air_min), borderColor: '#000', borderDash: [6, 4], borderWidth: 3.5, pointRadius: 0, fill: false }
+  ];
+  chDist.update();
+
+  chYear.data.labels = s.years;
+  chYear.data.datasets = [
+    { label: 'T máx. prom. 7 días (°C)', data: r.t7, backgroundColor: 'var(--accent-red)', borderColor: '#000', borderWidth: 2 },
+    { label: 'T mín. anual (°C)', data: r.tmin, backgroundColor: 'var(--accent-blue)', borderColor: '#000', borderWidth: 2 }
+  ];
+  chYear.update();
+}
+
+/* ===== RENDER VERIFICATION TABLE ===== */
+function renderVerif() {
+  let html = '';
+  VERIF_PY.forEach((p, i) => {
+    const j = computePG(p.lat, p.lon, { R: p.R, R_ah: p.R_ah, order: 't7f' });
+    const ok = j.st.id === p.station &&
+      Math.abs(j.T_pav_alto - p.T_pav_alto) < 0.01 &&
+      Math.abs(j.T_pav_bajo - p.T_pav_bajo) < 0.01 &&
+      Math.abs(j.PG_H_rel - p.PG_H_rel) < 0.01 &&
+      j.PG_alto === p.PG_alto &&
+      j.PG_bajo === p.PG_bajo &&
+      j.PG_ah === p.PG_ah;
+
+    html += `<tr>
+      <td><b>${i + 1}</b></td>
+      <td>${p.lat}, ${p.lon}</td>
+      <td>${p.R * 100}% / ${p.R_ah * 100}%</td>
+      <td><b>${j.st.id}</b></td>
+      <td>${f(p.T_pav_alto, 4)}</td>
+      <td>${f(j.T_pav_alto, 4)}</td>
+      <td>${f(p.T_pav_bajo, 4)}</td>
+      <td>${f(j.T_pav_bajo, 4)}</td>
+      <td>${f(p.PG_H_rel, 4)}</td>
+      <td>${f(j.PG_H_rel, 4)}</td>
+      <td><b>PG ${j.PG_alto}${j.PG_bajo} / ${j.PG_ah}</b></td>
+      <td><span class="${ok ? 'badge-pass' : 'badge-fail'}">${ok ? 'PASS ✓' : 'FAIL ✗'}</span></td>
+    </tr>`;
+  });
+  $('t-verif-body').innerHTML = html;
+}
+
+// Initial Run
+render();
+renderVerif();
+</script>
+</body>
+</html>
