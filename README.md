@@ -30,12 +30,19 @@ Puedes acceder y utilizar el workbench directamente desde tu navegador sin insta
   - **PG Alto (Temperatura Máxima de Pavimento)**: Algoritmo LTPP a 20 mm de profundidad con ajuste por latitud y nivel de confiabilidad estadística ($R \in [50\%, 98\%]$).
   - **PG Bajo (Temperatura Mínima de Pavimento)**: Modelo empírico a la superficie del pavimento con confiabilidad estadística Gaussiana.
   - **Susceptibilidad a Ahuellamiento (Rutting)**: Cálculo del parámetro de daño relativo con respecto a $52\,^\circ\text{C}$ y selección del grado de desempeño para rigidez a altas temperaturas de servicio.
+- **Estilo Visual e Interfaz (Linear / Dark SaaS Tech UI & Technical HUD)**:
+  - **Dark Mode Profundo con Ambient Glow**: Fondos oscuros con gradientes sutiles y luces ambientales violeta y cian inspirados en Linear, Vercel, Supabase y Raycast.
+  - **Cuadrícula Técnica de Fondo (Blueprint Digital)**: Trama milimétrica vectorial que simula un papel milimetrado de ingeniería interactivo.
+  - **Tarjetas y Contenedores Glassmórficos**: Bordes semitransparentes finos, esquinas redondeadas y sombras de elevación HUD.
+  - **Paleta de Alto Contraste Neón**: Naranja vibrante (`#ff6b2c`), Azul cian (`#00f0ff`), Morado eléctrico (`#8b5cf6`), Verde lima (`#10b981`) y Ámbar (`#f59e0b`) para diferenciar variables y límites normativos.
+  - **Tipografía Geométrica y Monospace**: `Plus Jakarta Sans` de alta legibilidad técnica combinada con `JetBrains Mono` para coordenadas WGS84, lecturas de telemetría y formulaciones Superpave.
 - **Cartografía Geoespacial Multicapa (Sin Marcas de Agua ni API Keys)**:
-  - 🗺️ *Esri World Topo Map*: Malla vial completa, poblados y relieve topográfico detallado (por defecto).
+  - 🌌 *Plano Técnico Oscuro (Esri Dark Gray)*: Cartografía HUD de alto contraste perfecta para visualización nocturna y técnica (por defecto).
   - 🛰️ *Esri World Imagery*: Fotografía aérea y satelital de alta resolución.
+  - 🚗 *Esri World Topo Map*: Malla vial completa, poblados y relieve topográfico.
   - 🛣️ *Esri World Street Map*: Enfoque urbano y red de autopistas.
-  - 📐 *Esri Light Gray Canvas*: Cartografía técnica minimalista de alto contraste.
-  - ⛰️ *OpenTopoMap*: Curvas de nivel y relieve sombreado.
+  - ⚪ *Plano Claro Minimalista (Esri Light Gray)*: Cartografía técnica neutral.
+  - 🏔️ *OpenTopoMap*: Curvas de nivel y relieve sombreado.
 - **Gráficos Analíticos Dinámicos**:
   - Series temporales multianuales de temperaturas máximas y mínimas por estación.
   - Curvas de distribución normal Gaussiana con indicador del percentil de confiabilidad seleccionado ($Z \cdot \sigma$).

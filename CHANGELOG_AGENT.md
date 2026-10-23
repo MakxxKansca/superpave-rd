@@ -40,3 +40,11 @@
 - tools/build_and_test.js: recompilacion sincronizada de PG_RD.html, PG_RD_brutalista.html e index.html con suite de pruebas aprobada (5/5 PASS).
 - README.md: documentacion de la funcionalidad del mapa de calor y variables termicas.
 - Git & GitHub Pages: sincronizacion con origen remoto para despliegue automatico en vivo.
+
+[2026-10-22 19:41]
+- tools/template.html: transformacion visual completa al estilo Linear / Dark SaaS Tech UI + Technical HUD / Blueprint digital. Fondos oscuros profundos (#06080d) con ambient glow purpura y cian, cuadricula tecnica de fondo milimetrica digital, tarjetas glassmorficas con bordes semitransparentes (rgba(255,255,255,0.08)) y esquinas redondeadas, paleta de alto contraste neon (naranja vibrante #ff6b2c, azul cian #00f0ff, morado electrico #8b5cf6, verde lima #10b981), tipografia Plus Jakarta Sans e Inter junto a JetBrains Mono para telemetria.
+- tools/update_theme.js: script automatizado de aplicacion de tokens y sincronizacion visual.
+- tools/template.html (Map & Charts): capa base oscura de alta definicion (Esri World Dark Gray Base) por defecto, marcadores vectoriales HUD con efecto de pulsacion neon, y configuracion de Chart.js con grillas tenues y lineas luminosas de alto contraste.
+- README.md: documentacion del nuevo sistema de diseno Linear / Dark SaaS y Technical HUD.
+- PG_RD.html, PG_RD_brutalista.html, index.html: recompilacion sincronizada con 5/5 pruebas aprobadas.
+- Git & GitHub Pages: sincronizacion con los repositorios remoto y despliegue continuo.
