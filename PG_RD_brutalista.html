@@ -702,10 +702,10 @@ a:hover { color: #fff; text-decoration: underline; }
 /* FLOATING HUD WIDGETS OVER MAP */
 .thermal-legend {
   position: absolute;
-  top: 14px;
+  bottom: 26px;
   right: 14px;
-  z-index: 1000;
-  background: rgba(9, 12, 22, 0.88);
+  z-index: 999;
+  background: rgba(9, 12, 22, 0.90);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -716,6 +716,7 @@ a:hover { color: #fff; text-decoration: underline; }
   min-width: 250px;
   max-width: 310px;
   transition: all .15s ease;
+  pointer-events: auto;
 }
 .thermal-legend-title {
   font-family: var(--sans);
@@ -830,6 +831,20 @@ a:hover { color: #fff; text-decoration: underline; }
 .leaflet-bar a:hover {
   background: rgba(255, 255, 255, 0.15)!important;
   color: var(--accent-cyan)!important;
+}
+.leaflet-control-attribution {
+  background: rgba(6, 8, 13, 0.75)!important;
+  color: var(--ink-dim)!important;
+  font-size: 0.62rem!important;
+  padding: 2px 8px!important;
+  border-top-left-radius: 4px;
+}
+.leaflet-control-attribution a {
+  color: var(--accent-cyan)!important;
+  text-decoration: none!important;
+}
+.leaflet-control-attribution a:hover {
+  text-decoration: underline!important;
 }
 
 /* TAB 2: CALCULATION STEPS (BLUEPRINT CODE CARDS) */
@@ -1080,6 +1095,23 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
   .kpi-deck { grid-template-columns: 1fr; }
   .chips-r { grid-template-columns: repeat(5, 1fr); }
   .presets-grid { grid-template-columns: 1fr 1fr; }
+  .thermal-legend {
+    bottom: 24px;
+    right: 8px;
+    min-width: 170px;
+    max-width: 200px;
+    padding: 7px 10px;
+    font-size: 0.65rem;
+  }
+  .map-floating-panel {
+    bottom: 24px;
+    left: 8px;
+    max-width: 140px;
+    padding: 7px 10px;
+    font-size: 0.65rem;
+  }
+  .map-floating-panel h4 { font-size: 0.68rem; margin-bottom: 4px; }
+  .legend-item { gap: 5px; font-size: 0.62rem; }
 }
 @media print {
   .app-header, .dock-sidebar, .stage-tabs, .workbench-statusbar, .app-actions { display: none!important; }

@@ -696,10 +696,10 @@ a:hover { color: #fff; text-decoration: underline; }
 /* FLOATING HUD WIDGETS OVER MAP */
 .thermal-legend {
   position: absolute;
-  top: 14px;
+  bottom: 26px;
   right: 14px;
-  z-index: 1000;
-  background: rgba(9, 12, 22, 0.88);
+  z-index: 999;
+  background: rgba(9, 12, 22, 0.90);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -710,6 +710,7 @@ a:hover { color: #fff; text-decoration: underline; }
   min-width: 250px;
   max-width: 310px;
   transition: all .15s ease;
+  pointer-events: auto;
 }
 .thermal-legend-title {
   font-family: var(--sans);

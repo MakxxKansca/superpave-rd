@@ -48,3 +48,9 @@
 - README.md: documentacion del nuevo sistema de diseno Linear / Dark SaaS y Technical HUD.
 - PG_RD.html, PG_RD_brutalista.html, index.html: recompilacion sincronizada con 5/5 pruebas aprobadas.
 - Git & GitHub Pages: sincronizacion con los repositorios remoto y despliegue continuo.
+
+## [2026-10-22 19:51] - Corrección de superposición de widgets en el mapa (Leyenda Térmica vs Selector de Capas)
+- **tools/template.html**: Se reubicó el widget .thermal-legend desde 	op: 14px; right: 14px; hacia ottom: 26px; right: 14px; z-index: 999; con pointer-events: auto;. Con esta separación vertical de más de 200px, el selector de mapas base y capas (.leaflet-control-layers, anclado a 	opright) queda 100% visible y libre de colisiones. Se añadió estilo HUD para .leaflet-control-attribution y adaptación responsiva en pantallas móviles <= 650px.
+- **tools/update_theme.js**: Sincronizadas las reglas CSS de .thermal-legend a ottom: 26px; right: 14px; para preservar coherencia entre herramientas de compilación.
+- **index.html, PG_RD.html, PG_RD_brutalista.html**: Regenerados mediante 
+ode tools/build_and_test.js (5/5 pruebas de validación numérica cruzada aprobadas, maxErr < 5e-9 °C).
