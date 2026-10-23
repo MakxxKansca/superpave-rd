@@ -45,6 +45,7 @@ try {
   });
   const elems = {};
   const mockDoc = {
+    documentElement: makeElem('html'),
     getElementById: id => (elems[id] = elems[id] || makeElem(id)),
     querySelectorAll: () => [makeElem('btn')],
     addEventListener: () => {}
@@ -53,6 +54,7 @@ try {
     divIcon: () => ({}),
     marker: () => ({
       bindTooltip: function() { return this; },
+      bindPopup: function() { return this; },
       addTo: function() { return this; },
       setLatLng: function() { return this; },
       setIcon: function() { return this; },
@@ -60,11 +62,16 @@ try {
     }),
     polyline: () => ({
       addTo: function() { return this; },
-      setLatLngs: function() { return this; }
+      setLatLngs: function() { return this; },
+      setStyle: function() { return this; }
+    }),
+    rectangle: () => ({
+      addTo: function() { return this; }
     }),
     layerGroup: () => ({
       addTo: function() { return this; },
-      addLayer: function() { return this; }
+      addLayer: function() { return this; },
+      clearLayers: function() { return this; }
     }),
     tileLayer: () => ({}),
     map: () => ({
@@ -106,8 +113,38 @@ try {
   vm.runInContext(grab('data') + grab('engine') + grab('ui'), uiCtx);
   
   // Exercise interactions
-  vm.runInContext('setCoord(19.2, -70.5); setR(0.95); updateHeatmap();', uiCtx);
-  console.log('PASS: script id="ui" ejecutado con exito (render(), setCoord(), setR(), updateHeatmap() OK)');
+  vm.runInContext(`
+    setCoord(19.2, -70.5);
+    setR(0.95);
+    setTheme('light');
+    setTheme('dark');
+    
+    // Test K-NN
+    const knn = findKNN(18.5, -70.0, 4);
+    if (!knn || knn.length !== 4) throw new Error('findKNN no retorno 4 estaciones');
+    const wSum = knn.reduce((s, k) => s + k.weight, 0);
+    if (Math.abs(wSum - 1.0) > 1e-4) throw new Error('Pesos K-NN no suman 1.0: ' + wSum);
+
+    // Test AASHTO Traffic & Speed Bumping
+    const basePG = computePG(18.50825, -70.00591, { R: 0.98, esals: 1.0, speed: 'fast' });
+    const slowPG = computePG(18.50825, -70.00591, { R: 0.98, esals: 1.0, speed: 'slow' });
+    const extPG = computePG(18.50825, -70.00591, { R: 0.98, esals: 35.0, speed: 'fast' });
+    if (basePG.bumping !== 0 || basePG.PG_alto_ajustado !== basePG.PG_alto) throw new Error('Error en basePG');
+    if (slowPG.bumping !== 1 || slowPG.PG_alto_ajustado !== basePG.PG_alto + 6) throw new Error('Error en slowPG bumping +1: ' + slowPG.PG_alto_ajustado);
+    if (extPG.bumping !== 2 || extPG.PG_alto_ajustado !== basePG.PG_alto + 12) throw new Error('Error en extPG bumping +2: ' + extPG.PG_alto_ajustado);
+
+    // Test Heatmap switching
+    state.heatMethod = 'voronoi';
+    updateHeatmap();
+    state.heatMethod = 'kriging';
+    updateHeatmap();
+    state.heatMethod = 'idw';
+    updateHeatmap();
+
+    // Test Geocoding offline lookup
+    lookupLocation(18.5, -70.0);
+  `, uiCtx);
+  console.log('PASS: script id="ui" ejecutado con exito (K-NN, Bumping AASHTO, Voronoi/Kriging, Geocoding y Temas OK)');
 } catch (err) {
   console.error('FAIL: script id="ui" arrojo error:', err);
   fails++;

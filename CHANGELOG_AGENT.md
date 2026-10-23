@@ -59,3 +59,22 @@ ode tools/build_and_test.js (5/5 pruebas de validación numérica cruzada aproba
 - **tools/update_theme.js**: Actualizado el bloque de reemplazo de iconos para incluir explícitamente stMarkers, stationLayerGroup y pin, evitando futuras regresiones.
 - **tools/build_and_test.js**: Añadida suite de pruebas de humo para <script id="ui"> que emula el entorno DOM, Leaflet y Chart.js en Node.js, validando la ejecución de ender(), setCoord(), setR() y updateHeatmap().
 - **index.html, PG_RD.html, PG_RD_brutalista.html**: Regenerados y probados al 100% (5/5 pruebas de cálculo Python vs JS aprobadas y ejecución de UI verificada).
+## [2026-10-23 03:25] - Transformación a Dashboard WebGIS Multi-Panel (100vh) & Algoritmos Espaciales Avanzados
+- **tools/template.html**:
+  - Implementado layout de 3 columnas en pantalla completa de 100vh (overflow: hidden general, scroll interno independiente): Panel izquierdo de controles (330px), Escenario central de 5 pestañas SPA (1fr) e Inspector técnico lateral derecho (350px).
+  - Implementado conmutador de tema dual (Dark SaaS Tech HUD / Light Technical) con botón sol/luna en la barra superior y persistencia en localStorage.
+  - WebGIS Leaflet: K-NN Spider Lines dinámicas en mousemove hacia las 4 estaciones más cercanas con cálculo de pesos de influencia por distancia inversa.
+  - Floating Cursor Tooltip pegado al ratón con actualización en vivo de coordenadas, temperatura interpolada y desglose de pesos.
+  - Marcadores de estaciones con popups interactivos y botón "Seleccionar esta Estación" que traslada el pin y sincroniza el análisis.
+  - Motor de interpolación espacial dual: Kriging Ordinario 2D (con semivariograma esférico, resolución matricial y parámetros ajustables de Range, Nugget y Sill) vs. Diagrama de Voronoi (Polígonos de Thiessen) vs. IDW.
+  - Selector de mapas base en la esquina superior derecha con Radio Buttons (Google Híbrido, Satélite, Esri Dark HUD, Esri Topo, Esri Calles, OpenTopoMap).
+  - Geocodificación Inversa Híbrida: consulta asíncrona a OpenStreetMap Nominatim con fallback instantáneo a diccionario espacial de las 32 provincias y carreteras troncales de RD.
+  - Reglas normativas de Tráfico y Velocidad AASHTO M 323 / M 320 con Grade Bumping (+1 o +2 grados comerciales) según ESALs (>10M, >30M) y velocidad (<70 km/h, <20 km/h).
+  - Pestaña 2 (Comparativa): matriz multi-estación, tabla de sensibilidad a confiabilidad R y matriz de tráfico/velocidad.
+  - Pestaña 3 (Gráficas): plugin interactivo de Crosshair vertical para Chart.js en curvas de distribución normal y series anuales.
+  - Pestaña 4 (Catálogo): tabla con encabezados fijos (sticky-header), buscador en tiempo real y filas interactivas clickeables que centran el mapa.
+  - Pestaña 5 (Memoria & Verificación): 6 pasos matemáticos formales y tabla de verificación Python vs JS.
+- **tools/build_and_test.js**:
+  - Ampliado con pruebas sintéticas para findKNN, bumping AASHTO, alternancia Voronoi/Kriging, geocodificación inversa y conmutación de temas.
+- **index.html, PG_RD.html, PG_RD_brutalista.html**:
+  - Bundles compilados exitosamente (114.0 KB). 5/5 casos de cálculo Python vs JS aprobados con tolerancia estricta (maxErr < 5e-9 °C).

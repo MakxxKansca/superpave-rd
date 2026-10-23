@@ -1,31 +1,36 @@
 # HANDOFF
 
 ## Estado Actual
-- **Fase**: Funcionalidad e interactividad 100% restauradas y blindadas.
+- **Fase**: Dashboard WebGIS Multi-Panel (100vh Full-Screen) 100% implementado, probado y compilado.
 - **Repositorio Público**: [MakxxKansca/superpave-rd](https://github.com/MakxxKansca/superpave-rd)
 - **URL en Vivo**: [https://makxxkansca.github.io/superpave-rd/](https://makxxkansca.github.io/superpave-rd/)
 - **Entregables Principales**:
-  - [index.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/index.html) (94.6 KB, Dark SaaS Tech UI + HUD Blueprint totalmente funcional).
+  - [index.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/index.html) (114.0 KB, WebGIS completo con 3 paneles, Kriging 2D, Voronoi, K-NN Spider Lines, Geocodificación y Catálogo).
   - [PG_RD.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD.html) y [PG_RD_brutalista.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD_brutalista.html).
-- **Validación Automática**: 5/5 casos de cálculo Python vs JS aprobados + test de integración y eventos de UI (`render()`, `setCoord()`, `setR()`, `updateHeatmap()`) aprobados en sandbox.
+- **Validación Automática**: 5/5 casos de cálculo Python vs JS aprobados (`maxErr < 5e-9 °C`) + test sintético de UI (K-NN, Bumping AASHTO, Voronoi/Kriging, Geocoding y Temas OK).
 
-## Decisiones Técnicas & Diagnóstico
-- **Causa Raíz de la Pérdida de Funcionalidad**:
-  - La expresión regular de actualización en `tools/update_theme.js` recortó el bloque entre la definición de iconos y la línea vectorial, eliminando `stMarkers`, `stationLayerGroup` y `pin`.
-  - Al cargar la página, el navegador arrojaba `ReferenceError: pin is not defined` en `L.layerGroup([link, pin])`, abortando el script de UI antes de inicializar los listeners de eventos y la función `render()`.
-- **Solución y Blindaje**:
-  - Se restauró la iteración de estaciones (`STATIONS.forEach`), marcadores tooltip, `stationLayerGroup` y el pin de proyecto con icono HUD Neón.
-  - Se amplió `tools/build_and_test.js` con un harness de prueba para `<script id="ui">` que emula DOM, Leaflet y Chart.js para que cualquier error de referencia impida el build.
+## Decisiones Técnicas & Arquitectura
+- **Layout de 3 Columnas (100vh)**: `grid-template-columns: 330px 1fr 350px; overflow: hidden;` con scroll independiente en los paneles laterales e inspector.
+- **Tema Dual**: Conmutador Dark SaaS HUD / Light Technical con variables CSS y persistencia en `localStorage`.
+- **WebGIS Interactivo**:
+  - *K-NN Spider Lines*: Polilíneas dinámicas en `mousemove` hacia las 4 estaciones más cercanas con cálculo de pesos por distancia inversa.
+  - *Floating Cursor Tooltip*: HUD pegado al puntero con coordenadas, temperatura en vivo y pesos.
+  - *Interpolación Dual*: Kriging Ordinario 2D continuo con semivariograma esférico vs. Diagrama de Voronoi (Polígonos de Thiessen) vs. IDW.
+  - *Tile Layer Switcher*: Selector con radio buttons en la esquina superior derecha.
+  - *Geocodificación Inversa Híbrida*: Consulta asíncrona a Nominatim OSM con fallback offline a las 32 provincias y carreteras de RD.
+- **Ajuste AASHTO M 323**: Reglas normativas de *Grade Bumping* por ESALs y velocidad operativa sin alterar la base de verificación.
+- **Visualización**: Gráficas con plugin de Crosshair vertical y Catálogo con tabla sticky-header interactiva con búsqueda.
 
 ## Archivos Tocados
-- `tools/template.html`: Restauración de `stMarkers`, `stationLayerGroup` y `pin`.
-- `tools/update_theme.js`: Corrección del bloque de iconos para evitar regresiones.
-- `tools/build_and_test.js`: Suite de validación ampliada para incluir script de UI y eventos.
-- `index.html`, `PG_RD.html`, `PG_RD_brutalista.html`: Bundles compilados y validados.
+- `tools/template.html`: Estructura HTML, estilos CSS y scripts de motor y UI.
+- `tools/build_and_test.js`: Suite de validación ampliada con mocks y assertions.
+- `index.html`, `PG_RD.html`, `PG_RD_brutalista.html`: Bundles generados y validados.
 - `CHANGELOG_AGENT.md` y `HANDOFF.md`: Protocolo de persistencia de memoria.
+- `docs/superpowers/specs/2026-10-23-webgis-dashboard-design.md`: Especificación técnica.
+- `docs/superpowers/plans/2026-10-23-webgis-dashboard.md`: Plan de implementación.
 
 ## Último Commit
-- `fix(engine): restaurar inicializacion de stMarkers, stationLayerGroup y pin en mapa interactivo`
+- `feat: implementar dashboard webgis interactivo con spider lines, voronoi, kriging, geocodificacion y catalogo`
 
 ## Próximo Paso Exacto
-- Abrir [PG_RD.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD.html) o recargar [https://makxxkansca.github.io/superpave-rd/](https://makxxkansca.github.io/superpave-rd/) en el navegador para comprobar la reactividad inmediata de clic en mapa, presets, sliders y cálculos.
+- Abrir [index.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/index.html) en el navegador para disfrutar de la experiencia WebGIS completa y verificar la fluidez de interacción.

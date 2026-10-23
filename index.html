@@ -1,10 +1,10 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Superpave PG Workbench · República Dominicana · Asignación 03</title>
-<meta name="description" content="Workbench de ingeniería civil para selección del grado de desempeño (PG) de ligantes asfálticos en República Dominicana. Método 7 días, PG bajo y daño por ahuellamiento.">
+<meta name="description" content="Workbench de ingeniería civil para selección del grado de desempeño (PG) de ligantes asfálticos en República Dominicana. Método 7 días, PG bajo, daño por ahuellamiento, Kriging 2D y Voronoi.">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@500;600;700;800&display=swap" rel="stylesheet">
@@ -14,13 +14,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
 <style>
 :root {
-  /* Linear / Dark SaaS Palette */
+  /* DARK SAAS TECH PALETTE */
   --bg-root: #06080d;
   --bg-subtle: #0b0e17;
   --panel: #0f1322;
   --panel-alt: #151a2d;
-  --panel-card: rgba(17, 22, 38, 0.72);
-  --panel-glass: rgba(13, 17, 30, 0.85);
+  --panel-card: rgba(17, 22, 38, 0.78);
+  --panel-glass: rgba(13, 17, 30, 0.90);
 
   /* High-Contrast Technical Typography Colors */
   --ink: #f8fafc;
@@ -35,7 +35,7 @@
   --border-focus: rgba(0, 240, 255, 0.45);
   --grid-line: rgba(255, 255, 255, 0.032);
 
-  /* High-Contrast Neon Tech Accents */
+  /* Neon Tech Accents */
   --accent-orange: #ff6b2c;
   --accent-orange-glow: rgba(255, 107, 44, 0.28);
   --accent-cyan: #00f0ff;
@@ -48,13 +48,6 @@
   --accent-amber-glow: rgba(245, 158, 11, 0.25);
   --accent-red: #ef4444;
 
-  /* Compatibility Aliases */
-  --bg: var(--bg-root);
-  --border-color: var(--border);
-  --accent-yellow: var(--accent-amber);
-  --accent-blue: var(--accent-cyan);
-  --accent-green: var(--accent-lime);
-
   /* Radii & Shadows */
   --r-sm: 6px;
   --r-md: 10px;
@@ -66,52 +59,91 @@
 
   /* Typography */
   --sans: 'Plus Jakarta Sans', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+  --mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
-/* BASE & DIGITAL BLUEPRINT GRID */
+[data-theme="light"] {
+  --bg-root: #f4f6fa;
+  --bg-subtle: #e9eef6;
+  --panel: #ffffff;
+  --panel-alt: #f8fafc;
+  --panel-card: rgba(255, 255, 255, 0.94);
+  --panel-glass: rgba(255, 255, 255, 0.92);
+
+  --ink: #0f172a;
+  --ink-secondary: #334155;
+  --ink-muted: #64748b;
+  --ink-dim: #94a3b8;
+
+  --border: rgba(0, 0, 0, 0.12);
+  --border-subtle: rgba(0, 0, 0, 0.07);
+  --border-light: rgba(0, 0, 0, 0.18);
+  --border-focus: rgba(0, 160, 230, 0.6);
+  --grid-line: rgba(0, 0, 0, 0.04);
+
+  --accent-orange: #ea580c;
+  --accent-orange-glow: rgba(234, 88, 12, 0.2);
+  --accent-cyan: #0284c7;
+  --accent-cyan-glow: rgba(2, 132, 199, 0.2);
+  --accent-purple: #7c3aed;
+  --accent-purple-glow: rgba(124, 58, 237, 0.2);
+  --accent-lime: #059669;
+  --accent-lime-glow: rgba(5, 150, 105, 0.2);
+  --accent-amber: #d97706;
+  --accent-amber-glow: rgba(217, 119, 6, 0.2);
+  --accent-red: #dc2626;
+
+  --shadow-hud: 0 8px 24px -4px rgba(0, 0, 0, 0.1), inset 0 1px 0 0 rgba(255, 255, 255, 0.9);
+  --shadow-sm: 0 2px 8px -1px rgba(0, 0, 0, 0.08);
+}
+
+/* BASE & 100VH NO SCROLL */
 * { box-sizing: border-box; margin: 0; padding: 0; }
 html, body {
+  height: 100vh;
+  max-height: 100vh;
+  overflow: hidden;
   background-color: var(--bg-root);
   color: var(--ink);
   font-family: var(--sans);
-  font-size: 13.5px;
-  line-height: 1.5;
-  min-height: 100vh;
-  background-image:
-    radial-gradient(circle at 50% -80px, rgba(139, 92, 246, 0.16) 0%, transparent 600px),
-    radial-gradient(circle at 100% 120px, rgba(0, 240, 255, 0.08) 0%, transparent 450px),
-    linear-gradient(to right, var(--grid-line) 1px, transparent 1px),
-    linear-gradient(to bottom, var(--grid-line) 1px, transparent 1px);
-  background-size: 100% 100%, 100% 100%, 30px 30px, 30px 30px;
-  background-attachment: fixed;
+  font-size: 13px;
+  line-height: 1.45;
 }
-body { display: flex; flex-direction: column; overflow-x: hidden; }
-a { color: var(--accent-cyan); text-decoration: none; font-weight: 600; transition: color .15s; }
-a:hover { color: #fff; text-decoration: underline; }
+body {
+  display: flex;
+  flex-direction: column;
+}
+a { color: var(--accent-cyan); text-decoration: none; font-weight: 600; }
+a:hover { text-decoration: underline; }
 .tabnum { font-variant-numeric: tabular-nums; font-family: var(--mono); }
 
-/* TOP APPLICATION BAR (DARK SAAS GLASS) */
+/* SCROLLBARS */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255, 255, 255, 0.15); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--accent-cyan); }
+[data-theme="light"] ::-webkit-scrollbar-thumb { background: rgba(0, 0, 0, 0.18); }
+
+/* TOP APPLICATION BAR */
 .app-header {
-  background: rgba(9, 11, 18, 0.82);
+  background: var(--panel-glass);
   backdrop-filter: blur(16px);
   -webkit-backdrop-filter: blur(16px);
   border-bottom: 1px solid var(--border);
   display: grid;
   grid-template-columns: auto 1fr auto;
   align-items: center;
-  position: sticky;
-  top: 0;
-  z-index: 1000;
+  height: 56px;
   padding: 0 16px;
-  height: 60px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
+  z-index: 1000;
+  box-shadow: var(--shadow-sm);
+  flex-shrink: 0;
 }
 .app-brand {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding-right: 20px;
+  gap: 10px;
+  padding-right: 18px;
   border-right: 1px solid var(--border);
 }
 .app-brand .badge {
@@ -119,49 +151,45 @@ a:hover { color: #fff; text-decoration: underline; }
   color: var(--accent-cyan);
   font-family: var(--mono);
   font-weight: 800;
-  font-size: 0.85rem;
-  padding: 4px 10px;
+  font-size: 0.82rem;
+  padding: 3px 8px;
   border-radius: var(--r-sm);
-  border: 1px solid rgba(0, 240, 255, 0.35);
-  box-shadow: 0 0 14px var(--accent-cyan-glow);
-  letter-spacing: .05em;
+  border: 1px solid var(--border-focus);
 }
 .app-brand .title-wrap {
   display: flex;
   flex-direction: column;
 }
 .app-brand .main-title {
-  font-family: var(--sans);
   font-weight: 800;
-  font-size: 1.05rem;
+  font-size: 0.98rem;
   letter-spacing: -0.02em;
-  color: #fff;
+  color: var(--ink);
   line-height: 1.2;
 }
 .app-brand .sub-title {
-  font-size: 0.72rem;
+  font-size: 0.68rem;
   font-weight: 600;
   color: var(--ink-muted);
-  letter-spacing: .02em;
   font-family: var(--mono);
 }
 .app-meta {
-  padding: 0 20px;
+  padding: 0 18px;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   overflow-x: auto;
 }
 .meta-chip {
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  font-size: 0.72rem;
+  gap: 6px;
+  font-size: 0.70rem;
   font-weight: 600;
-  background: rgba(255, 255, 255, 0.035);
+  background: rgba(255, 255, 255, 0.04);
   border: 1px solid var(--border);
   border-radius: 9999px;
-  padding: 4px 11px;
+  padding: 3px 10px;
   color: var(--ink-secondary);
   font-family: var(--mono);
   white-space: nowrap;
@@ -174,134 +202,119 @@ a:hover { color: #fff; text-decoration: underline; }
   box-shadow: 0 0 8px var(--accent-lime-glow);
   animation: pulseNeon 2s infinite;
 }
-@keyframes pulseNeon {
-  0%, 100% { opacity: 1; transform: scale(1); }
-  50% { opacity: 0.45; transform: scale(0.85); }
-}
+@keyframes pulseNeon { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.45; transform: scale(0.85); } }
+
 .app-actions {
   display: flex;
-  gap: 10px;
+  gap: 8px;
   align-items: center;
 }
 .app-btn {
   font-family: var(--sans);
   font-weight: 600;
-  font-size: 0.76rem;
+  font-size: 0.74rem;
   background: rgba(255, 255, 255, 0.04);
   color: var(--ink-secondary);
   border: 1px solid var(--border-light);
   border-radius: var(--r-sm);
-  padding: 7px 14px;
+  padding: 6px 11px;
   cursor: pointer;
-  display: flex;
+  display: inline-flex;
   align-items: center;
-  gap: 6px;
+  gap: 5px;
   transition: all .15s ease;
 }
 .app-btn:hover {
   background: rgba(255, 255, 255, 0.09);
-  color: #fff;
-  border-color: rgba(255, 255, 255, 0.25);
-  transform: translateY(-1px);
+  color: var(--ink);
+  border-color: var(--border-focus);
 }
-.app-btn.primary {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.25));
-  color: #fff;
-  border: 1px solid rgba(0, 240, 255, 0.45);
-  box-shadow: 0 0 16px var(--accent-cyan-glow);
-}
-.app-btn.primary:hover {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.35), rgba(139, 92, 246, 0.4));
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 22px rgba(0, 240, 255, 0.4);
+.app-btn.theme-btn {
+  font-size: 0.90rem;
+  padding: 5px 9px;
+  border-color: var(--border-focus);
+  color: var(--accent-amber);
 }
 
-/* WORKBENCH MAIN LAYOUT */
+/* 3-COLUMN WORKBENCH GRID (100VH FULLSCREEN) */
 .workbench-body {
   flex: 1;
   display: grid;
-  grid-template-columns: 400px 1fr;
+  grid-template-columns: 330px 1fr 350px;
   align-items: stretch;
-  min-height: calc(100vh - 96px);
+  height: calc(100vh - 56px - 28px);
+  max-height: calc(100vh - 56px - 28px);
+  overflow: hidden;
 }
 
-/* SIDEBAR CONTROLLER DOCK (HUD BLUEPRINT) */
+/* SIDEBAR CONTROLS (LEFT DOCK) */
 .dock-sidebar {
-  background: rgba(10, 13, 22, 0.65);
+  background: var(--panel-glass);
   backdrop-filter: blur(14px);
   -webkit-backdrop-filter: blur(14px);
   border-right: 1px solid var(--border);
   display: flex;
   flex-direction: column;
   overflow-y: auto;
-  gap: 1px;
+  overflow-x: hidden;
 }
 .dock-section {
-  padding: 16px;
+  padding: 13px 14px;
   border-bottom: 1px solid var(--border-subtle);
-  background: transparent;
   position: relative;
 }
 .dock-title {
-  font-family: var(--sans);
   font-weight: 700;
-  font-size: 0.8rem;
-  letter-spacing: .04em;
+  font-size: 0.76rem;
+  letter-spacing: .03em;
   text-transform: uppercase;
-  margin-bottom: 12px;
+  margin-bottom: 9px;
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 7px;
   color: var(--ink-secondary);
 }
 .dock-title span {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
   background: rgba(0, 240, 255, 0.1);
   color: var(--accent-cyan);
-  border: 1px solid rgba(0, 240, 255, 0.25);
-  padding: 2px 6px;
+  border: 1px solid var(--border-focus);
+  padding: 1px 5px;
   border-radius: 4px;
 }
-.field-group {
-  margin-bottom: 12px;
-}
+.field-group { margin-bottom: 9px; }
 .field-label {
   display: block;
-  font-size: 0.72rem;
+  font-size: 0.69rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: .03em;
   color: var(--ink-muted);
-  margin-bottom: 6px;
+  margin-bottom: 4px;
   font-family: var(--mono);
 }
 .coord-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  margin-bottom: 8px;
+  gap: 6px;
+  margin-bottom: 6px;
 }
 .coord-input-wrap {
   display: flex;
   align-items: center;
-  background: rgba(6, 8, 14, 0.7);
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  padding: 2px 8px;
-  transition: all .15s;
-}
-.coord-input-wrap:focus-within {
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 12px var(--accent-cyan-glow);
+  padding: 2px 7px;
 }
 .coord-input-wrap span {
   font-family: var(--mono);
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 800;
   color: var(--ink-dim);
-  margin-right: 6px;
+  margin-right: 5px;
 }
 .coord-input-wrap input {
   width: 100%;
@@ -309,814 +322,853 @@ a:hover { color: #fff; text-decoration: underline; }
   border: none;
   color: var(--ink);
   font-family: var(--mono);
-  font-size: 0.82rem;
+  font-size: 0.78rem;
   font-weight: 600;
-  padding: 6px 0;
+  padding: 4px 0;
   outline: none;
 }
 .btn-calc-main {
   width: 100%;
-  padding: 9px;
+  padding: 7px;
   background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(139, 92, 246, 0.18));
   color: var(--ink);
-  border: 1px solid rgba(0, 240, 255, 0.35);
+  border: 1px solid var(--border-focus);
   border-radius: var(--r-sm);
-  font-family: var(--sans);
   font-weight: 700;
-  font-size: 0.76rem;
-  letter-spacing: .02em;
+  font-size: 0.73rem;
   cursor: pointer;
   transition: all .15s;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
 }
 .btn-calc-main:hover {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.28), rgba(139, 92, 246, 0.3));
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.25), rgba(139, 92, 246, 0.3));
   border-color: var(--accent-cyan);
-  box-shadow: 0 0 18px var(--accent-cyan-glow);
-  transform: translateY(-1px);
 }
 .presets-grid {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 6px;
+  gap: 4px;
 }
 .preset-btn {
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid var(--border);
   color: var(--ink-secondary);
-  font-family: var(--sans);
-  font-size: 0.72rem;
+  font-size: 0.69rem;
   font-weight: 600;
-  padding: 6px 4px;
+  padding: 4px 3px;
   border-radius: var(--r-sm);
   cursor: pointer;
-  transition: all .12s;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  text-align: center;
 }
 .preset-btn:hover {
   background: rgba(255, 255, 255, 0.08);
-  border-color: var(--border-light);
-  color: #fff;
-  transform: translateY(-1px);
+  color: var(--ink);
 }
 
 /* RELIABILITY CHIPS */
 .chips-r {
   display: grid;
   grid-template-columns: repeat(5, 1fr);
-  gap: 5px;
-  margin-bottom: 8px;
+  gap: 4px;
+  margin-bottom: 6px;
 }
 .chips-r button {
   background: rgba(255, 255, 255, 0.035);
   border: 1px solid var(--border);
   color: var(--ink-secondary);
   font-family: var(--mono);
-  font-size: 0.72rem;
+  font-size: 0.69rem;
   font-weight: 700;
-  padding: 6px 0;
+  padding: 5px 0;
   border-radius: var(--r-sm);
   cursor: pointer;
-  transition: all .12s;
-}
-.chips-r button:hover:not([aria-pressed="true"]) {
-  background: rgba(255, 255, 255, 0.08);
-  border-color: var(--border-light);
-  color: #fff;
 }
 .chips-r button[aria-pressed="true"] {
   background: var(--accent-purple);
   color: #fff;
   border-color: var(--accent-purple);
-  box-shadow: 0 0 14px var(--accent-purple-glow);
+  box-shadow: 0 0 10px var(--accent-purple-glow);
 }
 .range-wrap {
   display: flex;
   flex-direction: column;
-  gap: 6px;
-  margin-bottom: 12px;
+  gap: 4px;
+  margin-bottom: 8px;
 }
 .range-wrap input[type=range] {
   width: 100%;
   accent-color: var(--accent-cyan);
-  height: 5px;
-  background: rgba(255, 255, 255, 0.1);
+  height: 4px;
   border-radius: 4px;
   outline: none;
 }
 .range-readout {
   display: flex;
   justify-content: space-between;
-  font-size: 0.74rem;
+  font-size: 0.71rem;
   font-weight: 700;
-  padding: 4px 8px;
-  background: rgba(0, 0, 0, 0.4);
+  padding: 3px 6px;
+  background: rgba(0, 0, 0, 0.25);
   border: 1px solid var(--border-subtle);
   border-radius: var(--r-sm);
   color: var(--accent-cyan);
 }
-
-/* TOGGLES / OPTIONS */
 .opt-box {
   display: flex;
-  gap: 9px;
+  gap: 7px;
   align-items: flex-start;
-  padding: 9px 11px;
+  padding: 7px 9px;
   background: rgba(255, 255, 255, 0.025);
   border: 1px solid var(--border);
   border-radius: var(--r-sm);
-  margin-bottom: 7px;
+  margin-bottom: 5px;
   cursor: pointer;
-  font-size: 0.74rem;
+  font-size: 0.71rem;
   color: var(--ink-secondary);
-  transition: all .15s;
 }
-.opt-box:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: var(--border-light);
-}
-.opt-box input {
-  width: 15px;
-  height: 15px;
-  accent-color: var(--accent-cyan);
-  margin-top: 2px;
-  flex-shrink: 0;
-}
-.opt-box b { color: #fff; }
+.opt-box input { margin-top: 2px; flex-shrink: 0; accent-color: var(--accent-cyan); }
 
-/* STATION INSPECTOR CARD (HUD BLUEPRINT) */
-.station-card {
-  background: rgba(12, 16, 28, 0.75);
-  border: 1px solid rgba(0, 240, 255, 0.2);
-  border-radius: var(--r-md);
-  box-shadow: 0 6px 24px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(0, 240, 255, 0.15);
-  padding: 14px;
-  position: relative;
-}
-.st-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 10px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 8px;
-}
-.st-badge {
-  font-family: var(--mono);
-  font-weight: 800;
-  font-size: 0.95rem;
-  color: var(--accent-cyan);
-  text-shadow: 0 0 12px var(--accent-cyan-glow);
-}
-.st-status {
-  font-size: 0.65rem;
-  font-weight: 800;
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--accent-lime);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-  padding: 2px 7px;
-  border-radius: 9999px;
-  text-transform: uppercase;
-  font-family: var(--mono);
-  letter-spacing: .04em;
-}
-.st-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 8px;
-  font-size: 0.74rem;
-}
-.st-item { display: flex; flex-direction: column; }
-.st-item .lbl { font-size: 0.65rem; color: var(--ink-dim); text-transform: uppercase; font-family: var(--mono); }
-.st-item .val { font-weight: 700; color: #fff; font-family: var(--mono); }
-
-/* HEATMAP SELECTOR GRID */
-.heat-mode-grid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 5px;
-}
-.heat-btn {
-  font-family: var(--sans);
-  font-size: 0.72rem;
-  font-weight: 600;
-  padding: 7px 10px;
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--ink-secondary);
+/* SELECT & NUMBER INPUTS */
+.select-dark {
+  width: 100%;
+  background: rgba(0, 0, 0, 0.35);
   border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  padding: 5px 8px;
   border-radius: var(--r-sm);
-  text-align: left;
+  outline: none;
   cursor: pointer;
-  transition: all .12s;
+  margin-bottom: 6px;
 }
-.heat-btn:hover {
-  background: rgba(255, 255, 255, 0.07);
-  border-color: var(--border-light);
-  color: #fff;
+.select-dark option { background: #0f1322; color: #fff; }
+[data-theme="light"] .select-dark option { background: #fff; color: #0f172a; }
+
+.variogram-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 5px;
+  margin-top: 6px;
 }
-.heat-btn.active {
-  background: linear-gradient(135deg, rgba(0, 240, 255, 0.15), rgba(139, 92, 246, 0.2));
-  color: #fff;
-  border-color: var(--accent-cyan);
-  box-shadow: 0 0 14px var(--accent-cyan-glow);
+.var-item {
+  display: flex;
+  flex-direction: column;
+  background: rgba(0, 0, 0, 0.2);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 4px 6px;
+}
+.var-item label { font-size: 0.62rem; color: var(--ink-dim); font-family: var(--mono); }
+.var-item input {
+  background: transparent;
+  border: none;
+  color: var(--accent-cyan);
+  font-family: var(--mono);
+  font-size: 0.74rem;
+  font-weight: 700;
+  outline: none;
 }
 
-/* RIGHT STAGE / WORKSPACE */
+/* CENTER STAGE (MAIN SPA VIEW) */
 .stage-main {
   display: flex;
   flex-direction: column;
+  height: 100%;
+  overflow: hidden;
+  position: relative;
   background: transparent;
-  overflow-y: auto;
+}
+.stage-tabs {
+  display: flex;
+  background: var(--panel-glass);
+  border-bottom: 1px solid var(--border);
+  padding: 6px 14px 0 14px;
+  gap: 5px;
+  overflow-x: auto;
+  flex-shrink: 0;
+}
+.tab-btn {
+  font-family: var(--sans);
+  font-weight: 600;
+  font-size: 0.74rem;
+  color: var(--ink-muted);
+  background: transparent;
+  border: 1px solid transparent;
+  border-bottom: none;
+  border-radius: var(--r-sm) var(--r-sm) 0 0;
+  padding: 7px 11px;
+  cursor: pointer;
+  white-space: nowrap;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+.tab-btn:hover { color: var(--ink); background: rgba(255, 255, 255, 0.04); }
+.tab-btn.active {
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-bottom: 1px solid var(--panel);
+  font-weight: 700;
+}
+.tab-btn .tab-count {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--ink-secondary);
+  padding: 1px 5px;
+  border-radius: 9999px;
+  font-size: 0.62rem;
+  font-family: var(--mono);
+}
+.tab-btn.active .tab-count {
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-focus);
 }
 
-/* TOP KPI STATS DECK (NEON HUD CARDS) */
-.kpi-deck {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 12px;
-  padding: 18px 20px;
-  background: transparent;
+.stage-content {
+  flex: 1;
+  height: calc(100% - 37px);
+  overflow-y: auto;
+  position: relative;
+}
+.tab-pane { display: none; height: 100%; }
+.tab-pane.active { display: flex; flex-direction: column; }
+
+/* TAB 1: WEBGIS MAP & FLOATING TOOLTIPS */
+.map-container {
+  height: 100%;
+  width: 100%;
+  position: relative;
+}
+#map {
+  height: 100%;
+  width: 100%;
+  background: #06080d;
+}
+
+/* FLOATING HUD TOOLTIP FOLLOWING MOUSE */
+.hud-cursor-tooltip {
+  position: absolute;
+  z-index: 3000;
+  pointer-events: none;
+  background: rgba(9, 12, 22, 0.94);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent-cyan);
+  border-radius: var(--r-sm);
+  padding: 7px 10px;
+  font-family: var(--mono);
+  font-size: 0.70rem;
+  color: #fff;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.6), 0 0 14px var(--accent-cyan-glow);
+  white-space: nowrap;
+  transition: opacity 0.12s ease;
+  opacity: 0;
+  transform: translate3d(15px, 15px, 0);
+}
+[data-theme="light"] .hud-cursor-tooltip {
+  background: rgba(255, 255, 255, 0.96);
+  color: #0f172a;
+  border-color: #0284c7;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);
+}
+.hud-cursor-tooltip .tooltip-header {
+  font-weight: 800;
+  color: var(--accent-cyan);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 3px;
+  margin-bottom: 4px;
+}
+.hud-cursor-tooltip .tooltip-temp {
+  font-size: 0.82rem;
+  font-weight: 800;
+  color: var(--accent-orange);
+  margin-bottom: 3px;
+}
+.hud-cursor-tooltip .tooltip-knn {
+  font-size: 0.65rem;
+  color: var(--ink-secondary);
+}
+
+/* CUSTOM POPUP FOR STATIONS */
+.hud-station-popup .leaflet-popup-content-wrapper {
+  background: rgba(10, 14, 26, 0.96);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  border: 1px solid var(--accent-cyan);
+  border-radius: var(--r-md);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
+  padding: 2px;
+}
+[data-theme="light"] .hud-station-popup .leaflet-popup-content-wrapper {
+  background: #fff;
+  color: #0f172a;
+  border-color: #0284c7;
+}
+.st-pop-content {
+  padding: 8px 10px;
+  font-family: var(--sans);
+  font-size: 0.73rem;
+}
+.st-pop-title {
+  font-weight: 800;
+  font-size: 0.82rem;
+  color: var(--accent-cyan);
+  margin-bottom: 4px;
+  font-family: var(--mono);
+}
+.st-pop-meta {
+  color: var(--ink-secondary);
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  margin-bottom: 6px;
+  line-height: 1.4;
+}
+.btn-select-st {
+  width: 100%;
+  padding: 6px;
+  background: linear-gradient(135deg, rgba(0, 240, 255, 0.2), rgba(139, 92, 246, 0.25));
+  color: #fff;
+  border: 1px solid var(--accent-cyan);
+  border-radius: var(--r-sm);
+  font-weight: 700;
+  font-size: 0.72rem;
+  cursor: pointer;
+  transition: all .15s;
+}
+.btn-select-st:hover {
+  background: var(--accent-cyan);
+  color: #000;
+}
+
+/* CUSTOM TILE SWITCHER ON TOP RIGHT */
+.custom-tile-switcher {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  z-index: 999;
+  background: var(--panel-glass);
+  backdrop-filter: blur(14px);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-hud);
+  padding: 8px 11px;
+  font-size: 0.71rem;
+  color: var(--ink);
+}
+.custom-tile-switcher h5 {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  color: var(--ink-muted);
+  font-family: var(--mono);
+  margin-bottom: 5px;
   border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 3px;
+}
+.custom-tile-switcher label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  margin-bottom: 3px;
+  font-weight: 600;
+  transition: color 0.12s;
+}
+.custom-tile-switcher label:hover { color: var(--accent-cyan); }
+.custom-tile-switcher input[type="radio"] { accent-color: var(--accent-cyan); }
+
+/* THERMAL LEGEND OVER MAP */
+.thermal-legend {
+  position: absolute;
+  bottom: 16px;
+  right: 14px;
+  z-index: 999;
+  background: var(--panel-glass);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-light);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-hud);
+  padding: 9px 12px;
+  font-size: 0.70rem;
+  min-width: 230px;
+}
+.thermal-legend-title {
+  font-weight: 700;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  margin-bottom: 5px;
+  color: var(--ink);
+}
+.thermal-bar {
+  height: 10px;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  margin-bottom: 5px;
+}
+.thermal-labels {
+  display: flex;
+  justify-content: space-between;
+  font-weight: 800;
+  font-size: 0.68rem;
+  color: var(--ink-secondary);
+  font-family: var(--mono);
+}
+
+/* RIGHT INSPECTOR DOCK */
+.dock-inspector {
+  background: var(--panel-glass);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border-left: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+/* GEOCODING CARD IN INSPECTOR */
+.geocoding-card {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 240, 255, 0.03);
+}
+.geo-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.65rem;
+  font-weight: 800;
+  color: var(--accent-cyan);
+  background: rgba(0, 240, 255, 0.1);
+  border: 1px solid var(--border-focus);
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: var(--mono);
+  margin-bottom: 5px;
+}
+.geo-route {
+  font-size: 0.88rem;
+  font-weight: 800;
+  color: var(--ink);
+  line-height: 1.25;
+  margin-bottom: 3px;
+}
+.geo-place {
+  font-size: 0.72rem;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+
+/* KPI CARDS (NEON ACCENTS) */
+.kpi-section {
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
 }
 .kpi-card {
   background: var(--panel-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
-  padding: 14px 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 10px 12px;
   display: flex;
   flex-direction: column;
-  position: relative;
-  transition: all .2s ease;
-  overflow: hidden;
+  transition: all .15s;
 }
-.kpi-card:hover {
-  transform: translateY(-2px);
-  border-color: var(--border-light);
-}
+.kpi-card:hover { border-color: var(--border-light); transform: translateY(-1px); }
 .kpi-card .kpi-tag {
-  font-size: 0.68rem;
+  font-size: 0.65rem;
   font-weight: 700;
   text-transform: uppercase;
-  letter-spacing: .04em;
-  margin-bottom: 6px;
+  letter-spacing: .03em;
   color: var(--ink-muted);
   font-family: var(--mono);
 }
 .kpi-card .kpi-value {
   font-family: var(--sans);
   font-weight: 800;
-  font-size: clamp(1.8rem, 2.5vw, 2.3rem);
+  font-size: 1.7rem;
   line-height: 1.1;
-  margin: 2px 0 4px 0;
-  letter-spacing: -0.02em;
+  margin: 2px 0;
 }
 .kpi-card .kpi-sub {
-  font-size: 0.85rem;
+  font-size: 0.78rem;
   font-weight: 700;
   color: var(--ink-secondary);
   font-family: var(--mono);
 }
 .kpi-card .kpi-footer {
-  margin-top: 10px;
-  padding-top: 8px;
-  border-top: 1px solid rgba(255, 255, 255, 0.06);
-  font-size: 0.68rem;
+  margin-top: 6px;
+  padding-top: 5px;
+  border-top: 1px solid var(--border-subtle);
+  font-size: 0.65rem;
   color: var(--ink-dim);
   display: flex;
   justify-content: space-between;
   font-family: var(--mono);
 }
 
-/* CARD ACCENTS (NEON GLOW BORDERS) */
-.kpi-card.c-red {
-  border-top: 2px solid var(--accent-orange);
-}
-.kpi-card.c-red .kpi-value {
-  color: var(--accent-orange);
-  text-shadow: 0 0 20px var(--accent-orange-glow);
-}
-.kpi-card.c-yellow {
-  border-top: 2px solid var(--accent-amber);
-}
-.kpi-card.c-yellow .kpi-value {
-  color: var(--accent-amber);
-  text-shadow: 0 0 20px var(--accent-amber-glow);
-}
-.kpi-card.c-blue {
-  border-top: 2px solid var(--accent-cyan);
-}
-.kpi-card.c-blue .kpi-value {
-  color: var(--accent-cyan);
-  text-shadow: 0 0 20px var(--accent-cyan-glow);
-}
-.kpi-card.c-dark {
-  border-top: 2px solid var(--accent-lime);
-}
-.kpi-card.c-dark .kpi-value {
-  color: var(--accent-lime);
-  text-shadow: 0 0 20px var(--accent-lime-glow);
-}
+/* KPI COLOR VARIATIONS */
+.kpi-card.c-red { border-top: 3px solid var(--accent-orange); }
+.kpi-card.c-red .kpi-value { color: var(--accent-orange); }
+.kpi-card.c-yellow { border-top: 3px solid var(--accent-amber); }
+.kpi-card.c-yellow .kpi-value { color: var(--accent-amber); }
+.kpi-card.c-blue { border-top: 3px solid var(--accent-cyan); }
+.kpi-card.c-blue .kpi-value { color: var(--accent-cyan); }
+.kpi-card.c-purple { border-top: 3px solid var(--accent-purple); }
+.kpi-card.c-purple .kpi-value { color: var(--accent-purple); }
+.kpi-card.c-lime { border-top: 3px solid var(--accent-lime); }
+.kpi-card.c-lime .kpi-value { color: var(--accent-lime); }
 
-/* WORKBENCH NAV TABS (LINEAR / IDE STYLE) */
-.stage-tabs {
-  display: flex;
-  background: rgba(11, 14, 23, 0.5);
-  border-bottom: 1px solid var(--border);
-  padding: 10px 20px 0 20px;
-  gap: 6px;
-  overflow-x: auto;
-}
-.tab-btn {
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 0.76rem;
-  color: var(--ink-muted);
-  background: transparent;
-  border: 1px solid transparent;
-  border-bottom: none;
-  border-radius: var(--r-sm) var(--r-sm) 0 0;
-  padding: 8px 14px;
-  cursor: pointer;
-  white-space: nowrap;
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  transition: all .15s;
-}
-.tab-btn:hover {
-  color: #fff;
-  background: rgba(255, 255, 255, 0.04);
-}
-.tab-btn.active {
-  color: #fff;
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-bottom: 1px solid var(--panel);
-  position: relative;
-  z-index: 10;
-  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.3);
-}
-.tab-btn .tab-count {
-  background: rgba(255, 255, 255, 0.08);
-  color: var(--ink-secondary);
-  padding: 1px 6px;
-  border-radius: 9999px;
+/* BUMPING BADGE */
+.bumping-badge {
+  display: inline-block;
   font-size: 0.65rem;
+  font-weight: 800;
+  padding: 2px 6px;
+  border-radius: 4px;
+  background: rgba(255, 107, 44, 0.15);
+  color: var(--accent-orange);
+  border: 1px solid rgba(255, 107, 44, 0.35);
+  margin-top: 3px;
   font-family: var(--mono);
 }
-.tab-btn.active .tab-count {
-  background: rgba(0, 240, 255, 0.15);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(0, 240, 255, 0.3);
-}
 
-/* TAB PANELS CONTAINER */
-.stage-content {
-  flex: 1;
-  padding: 20px;
-}
-.tab-pane { display: none; }
-.tab-pane.active { display: block; animation: fadeIn .2s ease; }
-@keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
-
-/* TAB 1: MAP VIEW */
-.map-container {
-  border: 1px solid var(--border-light);
+/* STATION INSPECTOR IN RIGHT PANEL */
+.station-card {
+  background: var(--panel-card);
+  border: 1px solid var(--border);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
-  background: #090c14;
-  position: relative;
-  overflow: hidden;
+  padding: 10px 12px;
 }
-#map {
-  height: 540px;
-  width: 100%;
-  background: #090c14;
-}
-
-/* FLOATING HUD WIDGETS OVER MAP */
-.thermal-legend {
-  position: absolute;
-  bottom: 26px;
-  right: 14px;
-  z-index: 999;
-  background: rgba(9, 12, 22, 0.90);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: var(--r-md);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  padding: 11px 14px;
-  font-size: 0.72rem;
-  min-width: 250px;
-  max-width: 310px;
-  transition: all .15s ease;
-  pointer-events: auto;
-}
-.thermal-legend-title {
-  font-family: var(--sans);
-  font-weight: 700;
-  font-size: 0.74rem;
-  text-transform: uppercase;
-  margin-bottom: 7px;
-  letter-spacing: .02em;
-  color: #fff;
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-.thermal-bar {
-  height: 12px;
-  width: 100%;
-  border-radius: 4px;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  margin-bottom: 6px;
-  box-shadow: 0 0 12px rgba(0, 0, 0, 0.5);
-}
-.thermal-labels {
+.st-card-header {
   display: flex;
   justify-content: space-between;
+  align-items: center;
+  margin-bottom: 7px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 5px;
+}
+.st-badge {
+  font-family: var(--mono);
   font-weight: 800;
-  font-size: 0.7rem;
-  color: var(--ink-secondary);
+  font-size: 0.86rem;
+  color: var(--accent-cyan);
+}
+.st-status {
+  font-size: 0.62rem;
+  font-weight: 800;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--accent-lime);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 1px 6px;
+  border-radius: 9999px;
   font-family: var(--mono);
 }
+.st-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 0.71rem;
+}
+.st-item { display: flex; flex-direction: column; }
+.st-item .lbl { font-size: 0.62rem; color: var(--ink-dim); text-transform: uppercase; font-family: var(--mono); }
+.st-item .val { font-weight: 700; color: var(--ink); font-family: var(--mono); }
 
-.map-floating-panel {
-  position: absolute;
-  bottom: 14px;
-  left: 14px;
-  z-index: 1000;
-  background: rgba(9, 12, 22, 0.88);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  border: 1px solid rgba(255, 255, 255, 0.12);
-  border-radius: var(--r-md);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.7);
-  padding: 10px 14px;
-  max-width: 270px;
-  font-size: 0.72rem;
+/* KNN WEIGHTS TABLE IN INSPECTOR */
+.knn-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.69rem;
+  font-family: var(--mono);
+  margin-top: 5px;
 }
-.map-floating-panel h4 {
-  font-family: var(--sans);
-  font-size: 0.76rem;
-  font-weight: 700;
-  text-transform: uppercase;
-  margin-bottom: 7px;
-  color: #fff;
-  letter-spacing: .03em;
+.knn-table th {
+  background: rgba(0, 0, 0, 0.25);
+  color: var(--ink-muted);
+  text-align: left;
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border-subtle);
 }
-.map-legend {
+.knn-table td {
+  padding: 4px 6px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+}
+.knn-bar-wrap {
+  width: 100%;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.knn-bar-fill {
+  height: 100%;
+  background: var(--accent-cyan);
+  border-radius: 3px;
+}
+
+/* TAB 2: COMPARATIVE VIEW */
+.comp-container {
+  padding: 18px;
   display: flex;
   flex-direction: column;
-  gap: 5px;
-  font-weight: 600;
-  color: var(--ink-secondary);
+  gap: 16px;
 }
-.legend-item { display: flex; align-items: center; gap: 8px; }
-.pin-icon { width: 11px; height: 11px; border-radius: 50%; }
-.pin-project { background: var(--accent-orange); border: 1px solid #fff; box-shadow: 0 0 8px var(--accent-orange); }
-.pin-active-st { background: var(--accent-cyan); border: 1px solid #fff; box-shadow: 0 0 8px var(--accent-cyan); }
-.pin-other-st { background: rgba(255, 255, 255, 0.3); border: 1px solid rgba(255, 255, 255, 0.6); }
-
-/* LEAFLET CONTROLS IN DARK HUD */
-.leaflet-control-layers {
-  border: 1px solid var(--border-light)!important;
-  border-radius: var(--r-md)!important;
-  box-shadow: var(--shadow-hud)!important;
-  background: rgba(9, 12, 22, 0.92)!important;
-  backdrop-filter: blur(16px)!important;
-  -webkit-backdrop-filter: blur(16px)!important;
-  font-family: var(--sans)!important;
-  font-size: 0.73rem!important;
-  font-weight: 600!important;
-  color: var(--ink-secondary)!important;
-  padding: 10px 14px!important;
-}
-.leaflet-control-layers-base label,
-.leaflet-control-layers-overlays label {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  cursor: pointer;
-  margin-bottom: 5px;
-  color: var(--ink-secondary);
-  transition: color .12s;
-}
-.leaflet-control-layers-base label:hover,
-.leaflet-control-layers-overlays label:hover {
-  color: #fff;
-}
-.leaflet-control-layers input {
-  accent-color: var(--accent-cyan);
-}
-.leaflet-bar {
-  border: 1px solid var(--border-light)!important;
-  border-radius: var(--r-sm)!important;
-  overflow: hidden;
-  box-shadow: var(--shadow-sm)!important;
-}
-.leaflet-bar a {
-  background: rgba(9, 12, 22, 0.9)!important;
-  color: var(--ink)!important;
-  border-bottom: 1px solid var(--border)!important;
-  font-weight: 700!important;
-  transition: all .12s;
-}
-.leaflet-bar a:hover {
-  background: rgba(255, 255, 255, 0.15)!important;
-  color: var(--accent-cyan)!important;
-}
-.leaflet-control-attribution {
-  background: rgba(6, 8, 13, 0.75)!important;
-  color: var(--ink-dim)!important;
-  font-size: 0.62rem!important;
-  padding: 2px 8px!important;
-  border-top-left-radius: 4px;
-}
-.leaflet-control-attribution a {
-  color: var(--accent-cyan)!important;
-  text-decoration: none!important;
-}
-.leaflet-control-attribution a:hover {
-  text-decoration: underline!important;
-}
-
-/* TAB 2: CALCULATION STEPS (BLUEPRINT CODE CARDS) */
-.steps-grid {
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  gap: 14px;
-}
-.step-card {
+.comp-card {
   background: var(--panel-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
   padding: 16px;
-  position: relative;
-  transition: all .2s;
+  box-shadow: var(--shadow-sm);
 }
-.step-card:hover {
-  border-color: var(--border-light);
-  transform: translateY(-2px);
-}
-.step-card h3 {
-  font-family: var(--sans);
+.comp-card h3 {
   font-size: 0.88rem;
   font-weight: 700;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  color: var(--ink);
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #fff;
-}
-.step-card .num {
-  font-family: var(--mono);
-  font-size: 0.7rem;
-  font-weight: 800;
-  background: rgba(0, 240, 255, 0.12);
-  color: var(--accent-cyan);
-  border: 1px solid rgba(0, 240, 255, 0.28);
-  padding: 2px 7px;
-  border-radius: 4px;
-}
-.eq-block {
-  background: #060810;
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  border-radius: var(--r-sm);
-  padding: 10px 12px;
-  font-family: var(--mono);
-  font-size: 0.74rem;
-  line-height: 1.6;
-  white-space: pre-wrap;
-  color: #38bdf8;
-  margin-top: 8px;
-}
-.eq-block b {
-  color: var(--accent-orange);
-  text-shadow: 0 0 10px var(--accent-orange-glow);
 }
 
-/* TAB 3: CHARTS (DARK TECH HUD) */
-.charts-grid {
+/* TAB 3: CHARTS VIEW WITH CROSSHAIR */
+.charts-container {
+  padding: 16px;
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 16px;
+  height: 100%;
 }
 .chart-box {
   background: var(--panel-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
-  padding: 16px;
+  box-shadow: var(--shadow-sm);
+  padding: 14px;
   display: flex;
   flex-direction: column;
-  height: 420px;
+  min-height: 280px;
+  flex: 1;
 }
 .chart-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
-  padding-bottom: 8px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid var(--border-subtle);
+  padding-bottom: 6px;
 }
-.chart-header h3 {
-  font-family: var(--sans);
-  font-size: 0.88rem;
-  font-weight: 700;
-  color: #fff;
-}
-.chart-canvas-wrap {
-  flex: 1;
-  position: relative;
-  min-height: 0;
-}
+.chart-header h3 { font-size: 0.82rem; font-weight: 700; color: var(--ink); }
+.chart-canvas-wrap { flex: 1; position: relative; min-height: 0; }
 
-/* TAB 4: ANNUAL DATA TABLE */
-.table-panel {
-  background: var(--panel-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
+/* TAB 4: STICKY HEADER CATALOG TABLE */
+.catalog-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  gap: 10px;
+}
+.cat-toolbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.cat-search {
+  flex: 1;
+  max-width: 320px;
+  background: rgba(0, 0, 0, 0.25);
+  border: 1px solid var(--border);
+  border-radius: var(--r-sm);
+  padding: 6px 10px;
+  color: var(--ink);
+  font-family: var(--sans);
+  font-size: 0.74rem;
+  outline: none;
+}
+.cat-btn-group { display: flex; gap: 5px; }
+.cat-btn {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  color: var(--ink-secondary);
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 5px 10px;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+}
+.cat-btn.active {
+  background: var(--accent-cyan);
+  color: #000;
+  border-color: var(--accent-cyan);
+  font-weight: 700;
+}
+.sticky-table-wrap {
+  flex: 1;
+  overflow-y: auto;
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
-  padding: 16px;
+  background: var(--panel-card);
 }
-.table-scroll {
-  max-height: 480px;
-  overflow: auto;
-  border: 1px solid var(--border-subtle);
-  border-radius: var(--r-sm);
-}
-table {
+.sticky-table {
   width: 100%;
   border-collapse: collapse;
-  font-size: 0.78rem;
   font-family: var(--mono);
+  font-size: 0.73rem;
 }
-th, td {
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  padding: 8px 12px;
-  text-align: right;
-}
-th {
-  background: #090c16;
-  color: var(--ink-secondary);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.7rem;
+.sticky-table th {
   position: sticky;
   top: 0;
-  z-index: 5;
-  letter-spacing: .03em;
+  z-index: 10;
+  background: var(--panel);
+  color: var(--ink);
+  font-weight: 800;
+  text-transform: uppercase;
+  padding: 8px 10px;
+  border-bottom: 2px solid var(--accent-cyan);
+  text-align: right;
 }
-td:first-child, th:first-child { text-align: left; }
-tbody tr:hover td { background: rgba(0, 240, 255, 0.05); color: #fff; }
-tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-orange); font-weight: 700; }
+.sticky-table th:first-child, .sticky-table td:first-child { text-align: left; }
+.sticky-table td {
+  padding: 6px 10px;
+  border-bottom: 1px solid var(--border-subtle);
+  color: var(--ink-secondary);
+  text-align: right;
+}
+.sticky-table tbody tr {
+  cursor: pointer;
+  transition: background 0.12s;
+}
+.sticky-table tbody tr:hover td {
+  background: rgba(0, 240, 255, 0.08);
+  color: var(--ink);
+}
+.sticky-table tr.selected td {
+  background: rgba(0, 240, 255, 0.15);
+  color: var(--accent-cyan);
+  font-weight: 700;
+}
 
-/* TAB 5: VERIFICATION SUITE */
-.verif-box {
+/* TAB 5: MEMORIA & VERIFICACION */
+.verif-container {
+  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.steps-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+.step-card {
   background: var(--panel-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
   border: 1px solid var(--border);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
-  padding: 16px;
+  padding: 13px;
+  box-shadow: var(--shadow-sm);
 }
+.step-card h3 {
+  font-size: 0.82rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  color: var(--ink);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.step-card .num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 800;
+  background: rgba(0, 240, 255, 0.12);
+  color: var(--accent-cyan);
+  border: 1px solid var(--border-focus);
+  padding: 1px 5px;
+  border-radius: 4px;
+}
+.eq-block {
+  background: rgba(0, 0, 0, 0.35);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-sm);
+  padding: 8px 10px;
+  font-family: var(--mono);
+  font-size: 0.71rem;
+  line-height: 1.5;
+  white-space: pre-wrap;
+  color: var(--accent-cyan);
+  margin-top: 6px;
+}
+.eq-block b { color: var(--accent-orange); }
+
 .badge-pass {
   background: rgba(16, 185, 129, 0.15);
   color: var(--accent-lime);
   border: 1px solid rgba(16, 185, 129, 0.35);
   font-weight: 800;
-  padding: 3px 9px;
+  padding: 2px 7px;
   border-radius: var(--r-sm);
   display: inline-block;
-  box-shadow: 0 0 10px var(--accent-lime-glow);
 }
 .badge-fail {
   background: rgba(239, 68, 68, 0.15);
   color: var(--accent-red);
   border: 1px solid rgba(239, 68, 68, 0.35);
   font-weight: 800;
-  padding: 3px 9px;
+  padding: 2px 7px;
   border-radius: var(--r-sm);
   display: inline-block;
 }
 
-/* TAB 6: ABOUT / METHODOLOGY */
-.about-box {
-  background: var(--panel-card);
-  backdrop-filter: blur(14px);
-  -webkit-backdrop-filter: blur(14px);
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  box-shadow: var(--shadow-hud);
-  padding: 24px;
-  font-size: 0.84rem;
-  line-height: 1.65;
-  color: var(--ink-secondary);
-}
-.about-box h3 {
-  font-family: var(--sans);
-  font-size: 1.05rem;
-  font-weight: 800;
-  color: #fff;
-  margin: 16px 0 8px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
-  padding-bottom: 6px;
-}
-.about-box h3:first-child { margin-top: 0; }
-.about-box p { margin-bottom: 10px; }
-.about-box ul { margin: 0 0 14px 24px; }
-.about-box li { margin-bottom: 4px; }
-
-/* TOAST NOTIFICATION */
-#toast {
-  position: fixed;
-  bottom: 30px;
-  right: 30px;
-  z-index: 9999;
-  background: rgba(9, 12, 22, 0.94);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
-  color: #fff;
-  border: 1px solid var(--accent-cyan);
-  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7), 0 0 20px var(--accent-cyan-glow);
-  padding: 10px 18px;
-  border-radius: var(--r-sm);
-  font-family: var(--sans);
-  font-weight: 600;
-  font-size: 0.8rem;
-  display: none;
-}
-
-/* BOTTOM STATUS BAR (HUD INSTRUMENTATION) */
+/* WORKBENCH STATUS BAR */
 .workbench-statusbar {
-  background: rgba(7, 9, 15, 0.92);
-  backdrop-filter: blur(16px);
+  background: var(--panel-glass);
+  backdrop-filter: blur(14px);
   border-top: 1px solid var(--border);
   color: var(--ink-muted);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 6px 16px;
-  font-size: 0.7rem;
+  padding: 0 16px;
+  height: 28px;
+  font-size: 0.68rem;
   font-family: var(--mono);
+  flex-shrink: 0;
 }
-.sb-group { display: flex; align-items: center; gap: 16px; }
-.sb-item { display: flex; align-items: center; gap: 6px; }
-.sb-label { color: var(--ink-dim); text-transform: uppercase; }
-.sb-val { font-weight: 700; color: #fff; }
+.sb-left, .sb-right { display: flex; align-items: center; gap: 14px; }
+.sb-item { display: flex; align-items: center; gap: 5px; }
+.sb-item .tag { color: var(--ink-dim); text-transform: uppercase; }
 
-/* RESPONSIVE BREAKPOINTS */
-@media (max-width: 1150px) {
-  .workbench-body { grid-template-columns: 1fr; }
-  .dock-sidebar { border-right: none; border-bottom: 1px solid var(--border); }
-  .kpi-deck { grid-template-columns: 1fr 1fr; }
-  .steps-grid { grid-template-columns: 1fr; }
-  .charts-grid { grid-template-columns: 1fr; }
+/* TOAST */
+#toast {
+  position: fixed;
+  bottom: 36px;
+  right: 36px;
+  z-index: 9999;
+  background: rgba(9, 12, 22, 0.94);
+  backdrop-filter: blur(14px);
+  color: #fff;
+  border: 1px solid var(--accent-cyan);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.7);
+  padding: 8px 14px;
+  border-radius: var(--r-sm);
+  font-size: 0.75rem;
+  display: none;
 }
-@media (max-width: 650px) {
-  .app-header { grid-template-columns: 1fr; height: auto; padding: 10px; gap: 8px; }
-  .app-brand { border-right: none; padding-right: 0; }
-  .app-actions { border-top: 1px solid var(--border); padding-top: 8px; }
-  .kpi-deck { grid-template-columns: 1fr; }
-  .chips-r { grid-template-columns: repeat(5, 1fr); }
-  .presets-grid { grid-template-columns: 1fr 1fr; }
-  .thermal-legend {
-    bottom: 24px;
-    right: 8px;
-    min-width: 170px;
-    max-width: 200px;
-    padding: 7px 10px;
-    font-size: 0.65rem;
-  }
-  .map-floating-panel {
-    bottom: 24px;
-    left: 8px;
-    max-width: 140px;
-    padding: 7px 10px;
-    font-size: 0.65rem;
-  }
-  .map-floating-panel h4 { font-size: 0.68rem; margin-bottom: 4px; }
-  .legend-item { gap: 5px; font-size: 0.62rem; }
-}
+
 @media print {
-  .app-header, .dock-sidebar, .stage-tabs, .workbench-statusbar, .app-actions { display: none!important; }
-  .workbench-body { display: block; }
-  .tab-pane { display: block!important; margin-bottom: 20px; page-break-inside: avoid; }
+  .app-header, .dock-sidebar, .dock-inspector, .stage-tabs, .workbench-statusbar { display: none!important; }
+  .workbench-body { display: block; height: auto!important; }
+  .tab-pane { display: block!important; page-break-inside: avoid; }
 }
 </style>
 </head>
@@ -1128,32 +1180,35 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
     <span class="badge">RD</span>
     <div class="title-wrap">
       <h1 class="main-title">Superpave PG · República Dominicana</h1>
-      <span class="sub-title">Transportes II · Asignación 03 (Punto D) · UTP 2026</span>
+      <span class="sub-title">WebGIS &amp; Selección de Ligante · AASHTO M 320 / M 323 · UTP 2026</span>
     </div>
   </div>
   <div class="app-meta">
-    <div class="meta-chip"><span class="dot"></span><span>MERRA-2 (2000–2025)</span></div>
+    <div class="meta-chip"><span class="dot"></span><span>NASA MERRA-2 (2000–2025)</span></div>
     <div class="meta-chip"><span>ESTUDIANTE:</span> <b>ELVIS BERMÚDEZ</b></div>
-    <div class="meta-chip"><span>MOTOR:</span> <b>JS 1:1 NOTEBOOK</b></div>
+    <div class="meta-chip"><span>PROFESOR:</span> <b>DR. ELVIS A. CASTILLO CAMARENA</b></div>
   </div>
   <div class="app-actions">
+    <button class="app-btn theme-btn" id="btn-theme-toggle" title="Cambiar Tema (Claro / Oscuro)">☀️</button>
     <button class="app-btn" id="btn-copy-summary" title="Copiar resumen del cálculo al portapapeles">📋 Copiar Resumen</button>
-    <button class="app-btn primary" id="btn-print" title="Imprimir o guardar como PDF">🖨️ Imprimir</button>
+    <button class="app-btn" id="btn-print" title="Imprimir o guardar reporte PDF">🖨️ Imprimir</button>
   </div>
 </header>
 
-<!-- MAIN WORKBENCH BODY -->
+<!-- MAIN 3-COLUMN WORKBENCH BODY -->
 <div class="workbench-body">
 
   <!-- LEFT CONTROLLER DOCK -->
-  <aside class="dock-sidebar" aria-label="Panel de Configuración">
+  <aside class="dock-sidebar" aria-label="Panel de Controles">
+    
+    <!-- 01 COORDENADAS -->
     <div class="dock-section">
       <div class="dock-title">
         <span>01</span>
         <b>Coordenada del Proyecto</b>
       </div>
       <div class="field-group">
-        <label class="field-label">Coordenadas en Grados Decimales (WGS84)</label>
+        <label class="field-label">Coordenadas en Grados (WGS84)</label>
         <div class="coord-grid">
           <div class="coord-input-wrap">
             <span>LAT</span>
@@ -1170,7 +1225,7 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
       <div class="field-group">
         <label class="field-label">Ubicaciones Predefinidas</label>
         <div class="presets-grid">
-          <button type="button" class="preset-btn" data-lat="18.50825" data-lon="-70.00591">Santo Domingo</button>
+          <button type="button" class="preset-btn" data-lat="18.50825" data-lon="-70.00591">Sto. Domingo</button>
           <button type="button" class="preset-btn" data-lat="19.45070" data-lon="-70.69700">Santiago</button>
           <button type="button" class="preset-btn" data-lat="18.42700" data-lon="-68.97200">La Romana</button>
           <button type="button" class="preset-btn" data-lat="18.20800" data-lon="-71.10000">Barahona</button>
@@ -1180,6 +1235,7 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
       </div>
     </div>
 
+    <!-- 02 CONFIABILIDAD -->
     <div class="dock-section">
       <div class="dock-title">
         <span>02</span>
@@ -1194,7 +1250,7 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
           <button type="button" data-r="0.99" id="r-99">99%</button>
         </div>
         <div class="range-wrap">
-          <input id="in-r" type="range" min="0.50" max="0.999" step="0.001" value="0.98" aria-label="Control deslizante de confiabilidad">
+          <input id="in-r" type="range" min="0.50" max="0.999" step="0.001" value="0.98" aria-label="Confiabilidad">
           <div class="range-readout tabnum">
             <span id="r-txt">R = 98.0%</span>
             <span id="z-txt">z = 2.0537</span>
@@ -1204,66 +1260,319 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
 
       <label class="opt-box" for="opt-ah">
         <input type="checkbox" id="opt-ah">
-        <span><b>Ahuellamiento con R = 50% fijo</b> (como en celda 18). Si no, usa R dinámico.</span>
+        <span><b>Ahuellamiento R = 50% fijo</b> (como en celda 18). Si no, usa R dinámico.</span>
       </label>
       <label class="opt-box" for="opt-ord">
         <input type="checkbox" id="opt-ord">
-        <span><b>Promedio móvil en orden cronológico.</b> Desmarcado = orden del archivo (notebook).</span>
+        <span><b>Promedio móvil cronológico.</b> Desmarcado = orden del archivo original.</span>
       </label>
     </div>
 
+    <!-- 03 TRAFICO Y VELOCIDAD AASHTO M 323 -->
     <div class="dock-section">
       <div class="dock-title">
         <span>03</span>
-        <b>Estación Meteorológica MERRA-2</b>
+        <b>Tráfico &amp; Velocidad (AASHTO)</b>
       </div>
-      <div class="station-card tabnum" id="st-card">
-        <div class="st-card-header">
-          <span class="st-badge" id="st-id">MERRA 119409</span>
-          <span class="st-status">ACTIVA</span>
+      
+      <div class="field-group">
+        <label class="field-label">Tráfico de Diseño (ESALs en Millones):</label>
+        <div class="range-wrap">
+          <input id="in-esals" type="range" min="0.1" max="40.0" step="0.5" value="3.0">
+          <div class="range-readout tabnum">
+            <span id="esals-txt">3.0 M ESALs</span>
+            <span id="esals-cat">Categoría: Heavy (H)</span>
+          </div>
         </div>
-        <div class="st-grid">
-          <div class="st-item"><span class="lbl">Lat / Lon</span><span class="val" id="st-coord">18.500°, -70.000°</span></div>
-          <div class="st-item"><span class="lbl">Distancia Radial</span><span class="val" id="st-dist">0.0101°</span></div>
-          <div class="st-item"><span class="lbl">Elevación</span><span class="val" id="st-elev">60 m</span></div>
-          <div class="st-item"><span class="lbl">Período de Datos</span><span class="val" id="st-period">2000–2025 (26 a)</span></div>
-        </div>
+      </div>
+
+      <div class="field-group">
+        <label class="field-label">Velocidad Operativa del Tránsito:</label>
+        <select class="select-dark" id="sel-speed">
+          <option value="fast">Rápida (&gt; 70 km/h) · Sin ajuste de grado (+0°C)</option>
+          <option value="slow">Lenta (20 a 70 km/h) · Ajuste +1 Grado (+6°C)</option>
+          <option value="standing">Parada / Congestión (&lt; 20 km/h) · Ajuste +2 Grados (+12°C)</option>
+        </select>
       </div>
     </div>
 
+    <!-- 04 CAPA TERMICA, KRIGING & VORONOI -->
     <div class="dock-section" style="border-bottom:none">
       <div class="dock-title">
         <span>04</span>
-        <b>Capa Térmica (Heatmap)</b>
+        <b>Capa Térmica &amp; Variograma</b>
       </div>
+      
       <label class="opt-box" for="chk-heat">
         <input type="checkbox" id="chk-heat" checked>
-        <span><b>Activar Mapa de Calor en RD</b><br><small style="color:var(--ink-muted)">Superposición térmica continua sobre el relieve y carreteras.</small></span>
+        <span><b>Activar Superposición Térmica</b></span>
       </label>
-      <div class="field-group" style="margin-top:8px">
-        <label class="field-label">Variable Térmica a Visualizar:</label>
-        <div class="heat-mode-grid">
-          <button type="button" class="heat-btn active" data-mode="talto">🔥 T. Pavimento Alta (PG Alto)</button>
-          <button type="button" class="heat-btn" data-mode="tbajo">❄️ T. Pavimento Baja (PG Bajo)</button>
-          <button type="button" class="heat-btn" data-mode="rutting">⚠️ Demanda Ahuellamiento (DD)</button>
-          <button type="button" class="heat-btn" data-mode="tair">☀️ Temp. Máx. Aire (7 Días)</button>
-        </div>
+
+      <div class="field-group">
+        <label class="field-label">Método de Interpolación:</label>
+        <select class="select-dark" id="sel-interp-method">
+          <option value="kriging">Kriging Ordinario 2D (Transiciones Suaves)</option>
+          <option value="voronoi">Diagrama de Voronoi (Polígonos de Thiessen)</option>
+          <option value="idw">IDW Ponderación Distancia Inversa</option>
+        </select>
       </div>
-      <div class="range-wrap" style="margin-top:8px">
+
+      <div class="field-group">
+        <label class="field-label">Variable Térmica a Visualizar:</label>
+        <select class="select-dark" id="sel-heat-var">
+          <option value="talto">🔥 T. Pavimento Alta (PG Alto - 7 Días)</option>
+          <option value="tbajo">❄️ T. Pavimento Baja (PG Bajo - Térmico)</option>
+          <option value="rutting">⚠️ Demanda de Ahuellamiento (DD)</option>
+          <option value="tair">☀️ Temp. Máxima del Aire (Prom. 7 Días)</option>
+        </select>
+      </div>
+
+      <div class="range-wrap">
         <div class="range-readout tabnum">
-          <span>Opacidad del Calor</span>
+          <span>Opacidad de Capa</span>
           <span id="heat-opacity-txt">75%</span>
         </div>
-        <input id="heat-opacity" type="range" min="0.2" max="1.0" step="0.05" value="0.75" aria-label="Opacidad del mapa de calor">
+        <input id="heat-opacity" type="range" min="0.2" max="1.0" step="0.05" value="0.75">
       </div>
+
+      <div id="kriging-params-wrap">
+        <label class="field-label">Parámetros del Semivariograma (Kriging):</label>
+        <div class="variogram-grid">
+          <div class="var-item">
+            <label>Range (a)</label>
+            <input type="number" id="krig-range" step="0.05" value="0.85">
+          </div>
+          <div class="var-item">
+            <label>Nugget (c₀)</label>
+            <input type="number" id="krig-nugget" step="0.05" value="0.15">
+          </div>
+          <div class="var-item">
+            <label>Sill (c)</label>
+            <input type="number" id="krig-sill" step="0.10" value="1.20">
+          </div>
+        </div>
+      </div>
+
     </div>
   </aside>
 
-  <!-- RIGHT STAGE / WORKSPACE -->
+  <!-- CENTER STAGE (MAIN SPA VIEW WITH 5 TABS) -->
   <main class="stage-main">
+    
+    <!-- SPA TABS NAVIGATION -->
+    <nav class="stage-tabs" role="tablist">
+      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="tab-map">🗺️ 1. Mapa Vial <span class="tab-count">WebGIS</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-comp">⚖️ 2. Comparativa <span class="tab-count">Matriz</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-charts">📈 3. Gráficas <span class="tab-count">Crosshair</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-cat">📋 4. Catálogo <span class="tab-count">Sticky</span></button>
+      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-verif">🔬 5. Memoria &amp; Verif <span class="tab-count">5/5 PASS</span></button>
+    </nav>
 
-    <!-- KPI STATS DECK -->
-    <section class="kpi-deck" aria-label="Resumen de Grados PG">
+    <!-- STAGE CONTENT PANES -->
+    <div class="stage-content">
+
+      <!-- TAB 1: WEBGIS MAP -->
+      <section id="tab-map" class="tab-pane active" role="tabpanel">
+        <div class="map-container">
+          <div id="map" role="application" aria-label="Mapa interactivo WebGIS"></div>
+
+          <!-- FLOATING CURSOR TOOLTIP -->
+          <div id="hud-cursor-tooltip" class="hud-cursor-tooltip">
+            <div class="tooltip-header" id="tt-coord">18.508° N, -70.006° W</div>
+            <div class="tooltip-temp" id="tt-val">T. Estimada: -- °C</div>
+            <div class="tooltip-knn" id="tt-knn">Pesos K-NN: Calculando...</div>
+          </div>
+
+          <!-- TILE LAYER SWITCHER (RADIO BUTTONS) -->
+          <div class="custom-tile-switcher">
+            <h5>Mapa Base (Top)</h5>
+            <label><input type="radio" name="basemap" value="esriDark" checked> 🌌 Esri Dark Canvas HUD</label>
+            <label><input type="radio" name="basemap" value="googleSat"> 🛰️ Satélite Google Híbrido</label>
+            <label><input type="radio" name="basemap" value="esriTopo"> 🚗 Esri Topográfico</label>
+            <label><input type="radio" name="basemap" value="esriStreet"> 🛣️ Esri Red Vial (Calles)</label>
+            <label><input type="radio" name="basemap" value="openTopo"> 🏔️ OpenTopoMap Relieve</label>
+          </div>
+
+          <!-- THERMAL LEGEND -->
+          <div class="thermal-legend" id="thermal-legend">
+            <div class="thermal-legend-title" id="thermal-legend-title">🔥 Mapa Térmico: T. Pavimento Alta</div>
+            <div class="thermal-bar" id="thermal-bar"></div>
+            <div class="thermal-labels tabnum">
+              <span id="th-min">-- °C</span>
+              <span id="th-mid">-- °C</span>
+              <span id="th-max">-- °C</span>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- TAB 2: COMPARATIVA -->
+      <section id="tab-comp" class="tab-pane" role="tabpanel">
+        <div class="comp-container">
+          <div class="comp-card">
+            <h3>⚖️ Matriz Comparativa: Estación Asignada vs. 3 Estaciones Vecinas</h3>
+            <div style="overflow-x:auto">
+              <table class="sticky-table tabnum" id="table-comp-knn">
+                <thead>
+                  <tr>
+                    <th>Estación MERRA-2</th>
+                    <th>Distancia</th>
+                    <th>Peso KNN</th>
+                    <th>Elevación</th>
+                    <th>T. Máx 7d</th>
+                    <th>T. Mín</th>
+                    <th>DD Ahuell.</th>
+                    <th>PG 7 Días</th>
+                    <th>PG Ahuell.</th>
+                    <th>PG Bajo</th>
+                  </tr>
+                </thead>
+                <tbody id="body-comp-knn"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="comp-card">
+            <h3>📈 Análisis de Sensibilidad: Confiabilidad (R) vs. Grados PG</h3>
+            <div style="overflow-x:auto">
+              <table class="sticky-table tabnum">
+                <thead>
+                  <tr>
+                    <th>Confiabilidad R</th>
+                    <th>Factor z (Acklam)</th>
+                    <th>T. Pav. Alta (°C)</th>
+                    <th>PG Alto (7 Días)</th>
+                    <th>PG Alto (Ahuell.)</th>
+                    <th>T. Pav. Baja (°C)</th>
+                    <th>PG Bajo</th>
+                    <th>Grado Comercial</th>
+                  </tr>
+                </thead>
+                <tbody id="body-comp-sens"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="comp-card">
+            <h3>🚦 Matriz de Tráfico (ESALs) &amp; Velocidad Operativa (AASHTO M 323)</h3>
+            <div style="overflow-x:auto">
+              <table class="sticky-table tabnum">
+                <thead>
+                  <tr>
+                    <th>Categoría Tráfico</th>
+                    <th>Rango ESALs</th>
+                    <th>Vel. Rápida (&gt;70 km/h)</th>
+                    <th>Vel. Lenta (20-70 km/h)</th>
+                    <th>Vel. Parada (&lt;20 km/h)</th>
+                  </tr>
+                </thead>
+                <tbody id="body-comp-traffic"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 3: GRAFICAS CON CROSSHAIR -->
+      <section id="tab-charts" class="tab-pane" role="tabpanel">
+        <div class="charts-container">
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Distribución Normal de Temperaturas del Aire (Campanas de Gauss con Cursor Cruzado)</h3>
+              <span class="tabnum" style="font-size:0.7rem;font-weight:700">CROSSHAIR ACTIVO</span>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="ch-dist" aria-label="Histogramas y curvas normales con crosshair"></canvas>
+            </div>
+          </div>
+
+          <div class="chart-box">
+            <div class="chart-header">
+              <h3>Historial Térmico Anual (2000–2025) con Línea Guía Interactiva</h3>
+              <span class="tabnum" style="font-size:0.7rem;font-weight:700">26 AÑOS DE REGISTRO</span>
+            </div>
+            <div class="chart-canvas-wrap">
+              <canvas id="ch-year" aria-label="Gráfica de barras de temperaturas con crosshair"></canvas>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 4: CATALOGO STICKY HEADER -->
+      <section id="tab-cat" class="tab-pane" role="tabpanel">
+        <div class="catalog-container">
+          <div class="cat-toolbar">
+            <input type="text" id="cat-search-input" class="cat-search" placeholder="🔍 Buscar por ID de estación o provincia...">
+            <div class="cat-btn-group">
+              <button class="cat-btn active" id="btn-cat-stations">16 Estaciones MERRA-2</button>
+              <button class="cat-btn" id="btn-cat-records">416 Registros Anuales Completos</button>
+            </div>
+          </div>
+
+          <div class="sticky-table-wrap">
+            <table class="sticky-table tabnum" id="cat-main-table">
+              <thead id="cat-table-head"></thead>
+              <tbody id="cat-table-body"></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- TAB 5: MEMORIA & VERIFICACION -->
+      <section id="tab-verif" class="tab-pane" role="tabpanel">
+        <div class="verif-container">
+          
+          <div class="comp-card">
+            <h3>🔬 Verificación Formal Python vs. JavaScript (Criterio del Profesor)</h3>
+            <p style="font-size:0.75rem;margin-bottom:8px;color:var(--ink-secondary)">
+              Tolerancia estricta: <code>|Δ| &lt; 0.01 °C</code> y grados comerciales exactamente coincidentes entre el motor Python y el motor JavaScript.
+            </p>
+            <div style="overflow-x:auto">
+              <table class="sticky-table tabnum">
+                <thead>
+                  <tr>
+                    <th>#</th>
+                    <th>Ubicación / Coordenada</th>
+                    <th>R / R<sub>ah</sub></th>
+                    <th>Estación</th>
+                    <th>T<sub>alto</sub> (Py)</th>
+                    <th>T<sub>alto</sub> (JS)</th>
+                    <th>T<sub>bajo</sub> (Py)</th>
+                    <th>T<sub>bajo</sub> (JS)</th>
+                    <th>PG<sub>H,rel</sub> (Py)</th>
+                    <th>PG<sub>H,rel</sub> (JS)</th>
+                    <th>PG Comercial</th>
+                    <th>Dictamen</th>
+                  </tr>
+                </thead>
+                <tbody id="t-verif-body"></tbody>
+              </table>
+            </div>
+          </div>
+
+          <div class="steps-grid" id="steps-container"></div>
+
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <!-- RIGHT INSPECTOR DOCK -->
+  <aside class="dock-inspector" aria-label="Inspector de Resultados">
+    
+    <!-- GEOCODING CARD -->
+    <div class="geocoding-card">
+      <div class="geo-badge">📍 GEOCODIFICACIÓN INVERSA (RD)</div>
+      <div class="geo-route" id="geo-road">Autopista Duarte (RD-1)</div>
+      <div class="geo-place" id="geo-details">Distrito Nacional / Santo Domingo · 18.508° N, -70.006° W</div>
+    </div>
+
+    <!-- KPI STATS CARDS -->
+    <div class="kpi-section">
+      
+      <!-- KPI 1: PG ALTO 7 DIAS -->
       <div class="kpi-card c-red">
         <span class="kpi-tag">01 · PG Alto (Método 7 Días)</span>
         <div class="kpi-value" id="kpi-pg-alto">PG 64</div>
@@ -1274,6 +1583,7 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
         </div>
       </div>
 
+      <!-- KPI 2: PG AHUELLAMIENTO -->
       <div class="kpi-card c-yellow">
         <span class="kpi-tag">02 · PG Alto (Ahuellamiento)</span>
         <div class="kpi-value" id="kpi-pg-ah">PG 82</div>
@@ -1284,6 +1594,7 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
         </div>
       </div>
 
+      <!-- KPI 3: PG BAJO -->
       <div class="kpi-card c-blue">
         <span class="kpi-tag">03 · PG Bajo (Térmico / Fatiga)</span>
         <div class="kpi-value" id="kpi-pg-bajo">PG -10</div>
@@ -1294,175 +1605,80 @@ tr.extreme-row td { background: rgba(255, 107, 44, 0.12); color: var(--accent-or
         </div>
       </div>
 
-      <div class="kpi-card c-dark">
-        <span class="kpi-tag">04 · Grado Comercial de Diseño</span>
+      <!-- KPI 4: GRADO COMERCIAL CON BUMPING AASHTO -->
+      <div class="kpi-card c-purple">
+        <span class="kpi-tag">04 · Grado Comercial Recomendado</span>
         <div class="kpi-value" id="kpi-pg-com">PG 64-10</div>
-        <div class="kpi-sub" id="kpi-pg-com-ah">PG 82-10 (Ahuellamiento)</div>
+        <div class="kpi-sub" id="kpi-pg-bumping-desc">Norma AASHTO M 323 / M 320</div>
+        <div class="bumping-badge" id="kpi-bump-badge">Sin salto de grado (+0°C)</div>
         <div class="kpi-footer">
-          <span>Norma AASHTO M 320</span>
-          <span>RD 2000-2025</span>
+          <span id="kpi-traffic-summary">3.0M ESALs · Rápida</span>
+          <span id="kpi-pg-com-ah">PG 82-10 (Ah.)</span>
         </div>
       </div>
-    </section>
-
-    <!-- WORKBENCH TABS -->
-    <nav class="stage-tabs" role="tablist">
-      <button class="tab-btn active" role="tab" aria-selected="true" data-tab="tab-map">🗺️ Mapa Interactivo (OSM) <span class="tab-count">RD</span></button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-steps">📐 Memoria de Cálculo <span class="tab-count">6 Pasos</span></button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-charts">📈 Análisis Estadístico <span class="tab-count">Gauss</span></button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-table">📊 Serie Anual <span class="tab-count">2000–2025</span></button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-verif">🔬 Verificación Py vs JS <span class="tab-count">5 Casos</span></button>
-      <button class="tab-btn" role="tab" aria-selected="false" data-tab="tab-about">📖 Metodología & Créditos</button>
-    </nav>
-
-    <!-- STAGE CONTENT -->
-    <div class="stage-content">
-
-      <!-- TAB 1: MAP -->
-      <section id="tab-map" class="tab-pane active" role="tabpanel">
-        <div class="map-container">
-          <div id="map" role="application" aria-label="Mapa interactivo de estaciones meteorológicas"></div>
-          <div class="thermal-legend" id="thermal-legend">
-            <div class="thermal-legend-title" id="thermal-legend-title">🔥 Mapa de Calor: T. Pavimento Alta</div>
-            <div class="thermal-bar" id="thermal-bar"></div>
-            <div class="thermal-labels tabnum">
-              <span id="th-min">-- °C</span>
-              <span id="th-mid">-- °C</span>
-              <span id="th-max">-- °C</span>
-            </div>
-          </div>
-          <div class="map-floating-panel">
-            <h4>Simbología de Navegación</h4>
-            <div class="map-legend">
-              <div class="legend-item"><span class="pin-icon pin-project"></span><span>Proyecto (Arrastrable / Clic)</span></div>
-              <div class="legend-item"><span class="pin-icon pin-active-st"></span><span>Estación MERRA-2 Asignada</span></div>
-              <div class="legend-item"><span class="pin-icon pin-other-st"></span><span>Otras Estaciones MERRA-2</span></div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 2: STEPS -->
-      <section id="tab-steps" class="tab-pane" role="tabpanel">
-        <div class="steps-grid" id="steps-container"></div>
-      </section>
-
-      <!-- TAB 3: CHARTS -->
-      <section id="tab-charts" class="tab-pane" role="tabpanel">
-        <div class="charts-grid">
-          <div class="chart-box">
-            <div class="chart-header">
-              <h3>Distribución de Temperaturas Anuales del Aire</h3>
-              <span class="tabnum" style="font-size:0.7rem;font-weight:700">15 CLASES DENSITY=TRUE</span>
-            </div>
-            <div class="chart-canvas-wrap">
-              <canvas id="ch-dist" aria-label="Histogramas y curvas normales"></canvas>
-            </div>
-          </div>
-          <div class="chart-box">
-            <div class="chart-header">
-              <h3>Historial Térmico Anual (2000 – 2025)</h3>
-              <span class="tabnum" style="font-size:0.7rem;font-weight:700">26 AÑOS DE REGISTRO</span>
-            </div>
-            <div class="chart-canvas-wrap">
-              <canvas id="ch-year" aria-label="Gráfica de barras de temperaturas por año"></canvas>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 4: ANNUAL DATA -->
-      <section id="tab-table" class="tab-pane" role="tabpanel">
-        <div class="table-panel">
-          <div class="table-scroll">
-            <table class="tabnum">
-              <thead>
-                <tr>
-                  <th>Año</th>
-                  <th>Máx. Prom. 7 Días T<sub>max</sub> (°C)</th>
-                  <th>T<sub>min</sub> Anual del Aire (°C)</th>
-                  <th>Grados-Día Acumulados &gt; 10°C</th>
-                </tr>
-              </thead>
-              <tbody id="t-year-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 5: VERIFICATION -->
-      <section id="tab-verif" class="tab-pane" role="tabpanel">
-        <div class="verif-box">
-          <p style="margin-bottom:10px;font-size:0.78rem">
-            <b>Criterio de Aceptación del Profesor (Parte D):</b> Comparación obligatoria de al menos 3 coordenadas calculadas en Python vs. los resultados dinámicos en JavaScript. Tolerancia estricta: <code>|Δ| &lt; 0.01 °C</code> y grados comerciales exactamente coincidentes.
-          </p>
-          <div class="table-scroll" style="max-height:none">
-            <table class="tabnum">
-              <thead>
-                <tr>
-                  <th>#</th>
-                  <th>Ubicación / Coordenada</th>
-                  <th>R / R<sub>ah</sub></th>
-                  <th>Estación</th>
-                  <th>T<sub>alto</sub> (Py)</th>
-                  <th>T<sub>alto</sub> (JS)</th>
-                  <th>T<sub>bajo</sub> (Py)</th>
-                  <th>T<sub>bajo</sub> (JS)</th>
-                  <th>PG<sub>H,rel</sub> (Py)</th>
-                  <th>PG<sub>H,rel</sub> (JS)</th>
-                  <th>PG Comercial</th>
-                  <th>Dictamen</th>
-                </tr>
-              </thead>
-              <tbody id="t-verif-body"></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <!-- TAB 6: ABOUT -->
-      <section id="tab-about" class="tab-pane" role="tabpanel">
-        <div class="about-box">
-          <h3>Fuente de Datos Climáticos</h3>
-          <p>
-            Temperaturas diarias del aire (máxima y mínima) correspondientes al período 2000–2025 provenientes del modelo de reanálisis MERRA-2 (NASA), obtenidas desde la plataforma InfoPave. De las 18 cuadrículas geográficas de República Dominicana, 16 contienen datos terrestres utilizables (las estaciones 118835 y 121135 corresponden a mar abierto y están desestimadas).
-          </p>
-          <h3>Metodología Superpave Implementada</h3>
-          <ul>
-            <li><b>Selección de Estación:</b> Mínima distancia euclidiana en grados entre las coordenadas del proyecto y los centroides MERRA-2.</li>
-            <li><b>PG Alto Clásico (7 Días):</b> Ecuación de transformación térmica a 20 mm de profundidad con confiabilidad <i>R</i> (inversa de la normal estándar mediante aproximación de Acklam).</li>
-            <li><b>PG Bajo:</b> Ecuación de transformación térmica en superficie (H = 0 mm) aplicando el criterio Superpave de grado comercial más cercano (óptimo clima tropical).</li>
-            <li><b>Modelo de Daños por Ahuellamiento:</b> Ecuaciones empíricas 5.9 a 5.11 basadas en Grados-Día acumulados (DD sobre 10°C) y rodera admisible RD = 10 mm.</li>
-          </ul>
-          <h3>Referencia Bibliográfica</h3>
-          <p>
-            [1] Loría-Salazar, L., Cuadrado-Valbuena, J. M., Villegas-Villegas, E., &amp; Castillo-Camarena, E. A. (2024). <i>Introducción a los Cementos y Ligantes Asfálticos: Caracterización, Reología y Producción.</i> Ediciones Hombre de La Mancha.
-          </p>
-          <h3>Créditos Institucionales</h3>
-          <p>
-            Desarrollado por Elvis Bermúdez · Estudiante de Ingeniería Civil · Asignatura: Transportes II (Código 8033) · Profesor: Dr. Elvis A. Castillo Camarena · Universidad Tecnológica de Panamá (UTP) · II Semestre 2026.
-          </p>
-        </div>
-      </section>
 
     </div>
-  </main>
+
+    <!-- FICHA TECNICA DE LA ESTACION ACTIVA -->
+    <div class="dock-section">
+      <div class="dock-title">
+        <span>05</span>
+        <b>Estación Meteorológica Asignada</b>
+      </div>
+      <div class="station-card tabnum" id="st-card">
+        <div class="st-card-header">
+          <span class="st-badge" id="st-id">MERRA 119409</span>
+          <span class="st-status">ACTIVA</span>
+        </div>
+        <div class="st-grid">
+          <div class="st-item"><span class="lbl">Coordenadas</span><span class="val" id="st-coord">18.500°, -70.000°</span></div>
+          <div class="st-item"><span class="lbl">Distancia</span><span class="val" id="st-dist">0.0101°</span></div>
+          <div class="st-item"><span class="lbl">Elevación</span><span class="val" id="st-elev">60 m</span></div>
+          <div class="st-item"><span class="lbl">Registros</span><span class="val" id="st-period">2000–2025 (26 a)</span></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- INFLUENCIA K-NN / ESTACIONES CERCANAS -->
+    <div class="dock-section" style="border-bottom:none">
+      <div class="dock-title">
+        <span>06</span>
+        <b>Influencia Espacial K-NN</b>
+      </div>
+      <p style="font-size:0.68rem;color:var(--ink-muted);margin-bottom:6px">
+        Estaciones que influyen en las líneas dinámicas del cursor:
+      </p>
+      <table class="knn-table" id="inspector-knn-table">
+        <thead>
+          <tr>
+            <th>Estación</th>
+            <th>Dist.</th>
+            <th>Peso %</th>
+            <th style="width:40%">Influencia</th>
+          </tr>
+        </thead>
+        <tbody id="inspector-knn-body"></tbody>
+      </table>
+    </div>
+
+  </aside>
+
 </div>
 
 <!-- WORKBENCH STATUS BAR -->
 <footer class="workbench-statusbar tabnum">
   <div class="sb-left">
-    <div class="sb-item"><span class="tag">MERRA:</span> <span id="sb-st">119409</span></div>
-    <div class="sb-item"><span class="tag">COORD:</span> <span id="sb-coord">18.50825° N, -70.00591° W</span></div>
+    <div class="sb-item"><span class="tag">ESTACIÓN:</span> <span id="sb-st">119409</span></div>
+    <div class="sb-item"><span class="tag">PROYECTO:</span> <span id="sb-coord">18.50825° N, -70.00591° W</span></div>
     <div class="sb-item"><span class="tag">DISTANCIA:</span> <span id="sb-dist">0.0101°</span></div>
   </div>
   <div class="sb-right">
-    <div class="sb-item"><span class="tag">MOTOR:</span> <span>ACKLAM NORMAL-INV</span></div>
-    <div class="sb-item ok"><span>● SISTEMA VERIFICADO (5/5 PASS)</span></div>
+    <div class="sb-item"><span class="tag">MÉTODO:</span> <span id="sb-method">KRIGING 2D</span></div>
+    <div class="sb-item" style="color:var(--accent-lime)"><span>● SISTEMA VERIFICADO (5/5 PASS)</span></div>
   </div>
 </footer>
 
-<div id="toast" role="status">Copiado al portapapeles</div>
+<div id="toast" role="status">Notificación</div>
 
 <script id="data">
 const STATIONS = [{"id":119983,"lat":19.0,"lon":-71.25,"elev":1209,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[33.0,32.914286,32.714286,32.357143,32.285714,33.485714,33.442857,32.814286,33.628571,32.871429,33.271429,31.5,32.242857,31.971429,32.957143,34.614286,33.271429,32.7,32.271429,33.6,33.814286,32.0,32.271429,33.514286,33.071429,34.257143],"t7s":[33.0,32.914286,32.714286,32.528571,32.285714,33.485714,33.442857,33.257143,33.628571,32.871429,33.271429,31.885714,32.242857,31.971429,32.857143,34.614286,33.271429,32.7,32.442857,33.6,33.814286,32.0,32.271429,33.157143,33.071429,34.257143],"tmin":[10.5,11.2,12.0,11.9,11.0,10.2,11.6,13.3,10.0,11.2,9.9,11.5,12.2,11.2,13.2,13.8,12.3,11.8,11.0,11.7,12.9,11.0,12.5,10.7,12.3,12.1],"dd":[4779.15,4976.85,5101.15,4963.9,4811.05,4935.5,5012.05,4916.5,4856.35,4911.7,4926.75,4708.75,4789.35,4986.05,5049.1,5124.5,4898.85,4788.85,4886.7,5137.95,5062.9,4606.8,4949.2,5106.7,5018.0,4965.35]},{"id":119984,"lat":19.0,"lon":-70.625,"elev":1212,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[31.142857,30.528571,30.357143,30.828571,29.685714,32.028571,31.5,30.8,32.314286,31.057143,31.628571,30.114286,32.157143,30.628571,31.071429,32.842857,30.414286,31.1,30.742857,32.485714,31.414286,30.242857,30.057143,32.485714,30.671429,31.285714],"t7s":[31.142857,30.528571,30.357143,30.828571,29.757143,32.028571,31.5,30.985714,32.314286,31.057143,31.628571,30.142857,32.157143,30.628571,31.071429,33.085714,30.414286,31.1,30.742857,31.885714,31.414286,30.242857,30.057143,32.485714,30.885714,31.285714],"tmin":[8.9,12.3,11.8,12.3,11.4,11.4,11.5,13.0,11.0,10.6,10.9,12.2,12.2,11.0,12.3,14.0,12.6,10.0,11.4,12.4,13.6,12.3,13.5,11.1,12.1,12.1],"dd":[4462.55,4596.35,4689.75,4672.05,4466.25,4638.7,4712.85,4662.9,4510.4,4535.05,4584.95,4409.8,4513.55,4615.15,4697.75,4753.6,4573.3,4499.35,4500.1,4819.85,4730.1,4329.0,4514.2,4828.0,4675.65,4605.05]},{"id":119985,"lat":19.0,"lon":-70.0,"elev":117,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[36.242857,35.742857,35.542857,35.428571,34.671429,36.028571,36.314286,35.3,36.042857,35.142857,35.842857,34.485714,36.742857,34.742857,35.8,37.457143,35.228571,34.871429,35.642857,36.242857,36.642857,35.028571,34.771429,36.414286,35.171429,35.714286],"t7s":[36.442857,35.742857,35.542857,35.614286,34.814286,36.1,36.314286,35.6,36.042857,35.142857,36.057143,34.485714,36.742857,34.742857,35.8,37.457143,35.228571,34.871429,35.642857,36.228571,36.642857,35.028571,34.957143,36.414286,35.171429,35.814286],"tmin":[14.6,17.1,16.4,18.1,16.7,15.2,15.8,17.7,15.9,15.8,15.4,17.0,17.0,16.8,16.4,18.3,17.7,15.8,16.2,17.7,18.1,17.1,17.8,15.7,16.1,15.7],"dd":[6198.1,6300.7,6375.75,6365.75,6152.75,6233.35,6367.75,6328.95,6165.45,6202.85,6157.7,6056.5,6213.4,6263.85,6375.55,6425.5,6230.75,6147.7,6183.25,6454.75,6378.5,6027.0,6200.95,6471.25,6299.65,6258.8]},{"id":119986,"lat":19.0,"lon":-69.375,"elev":34,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[33.442857,33.471429,32.614286,33.514286,32.757143,34.157143,34.2,33.614286,33.742857,33.114286,33.214286,32.514286,34.671429,33.442857,33.671429,34.342857,32.528571,32.542857,33.3,33.871429,33.671429,33.085714,32.657143,34.114286,33.028571,33.742857],"t7s":[33.442857,33.471429,32.614286,33.514286,32.757143,34.457143,34.2,33.728571,33.742857,33.114286,33.528571,32.514286,34.671429,33.442857,33.671429,34.414286,32.528571,32.542857,33.3,33.857143,33.671429,33.085714,32.685714,34.114286,33.028571,33.742857],"tmin":[17.5,19.9,19.5,20.3,19.2,17.9,19.5,20.7,19.6,19.4,18.4,19.3,19.9,20.4,20.1,20.8,20.1,18.5,19.0,20.0,20.2,19.8,20.2,19.1,18.9,19.1],"dd":[6250.35,6330.75,6326.65,6393.2,6182.35,6255.15,6385.3,6397.5,6189.5,6217.2,6221.65,6094.6,6251.2,6270.4,6383.35,6369.35,6253.7,6146.25,6179.1,6443.4,6387.45,6143.1,6186.1,6447.55,6350.8,6260.4]},{"id":119987,"lat":19.0,"lon":-68.75,"elev":-42,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[30.342857,30.442857,30.042857,30.185714,30.057143,30.857143,30.585714,30.728571,30.271429,30.071429,30.1,29.657143,30.985714,31.071429,30.428571,31.171429,30.414286,30.585714,29.628571,31.314286,30.928571,30.157143,30.285714,31.285714,31.257143,30.928571],"t7s":[30.342857,30.714286,30.042857,30.185714,30.057143,30.985714,30.585714,30.728571,30.7,30.071429,30.414286,29.685714,30.985714,31.071429,30.428571,31.271429,30.414286,30.585714,29.628571,31.314286,30.928571,30.157143,30.285714,31.342857,31.257143,31.028571],"tmin":[21.0,22.0,22.2,23.6,22.4,21.2,21.7,23.1,22.2,22.1,21.6,22.1,22.3,22.5,23.2,23.3,23.3,22.0,22.1,23.0,23.0,22.9,22.7,21.8,22.4,22.4],"dd":[6098.85,6206.8,6197.1,6262.95,6097.1,6179.7,6269.95,6313.05,6127.6,6133.9,6238.85,6065.8,6189.75,6169.15,6258.8,6274.05,6255.9,6158.15,6135.25,6334.75,6347.3,6214.6,6198.3,6414.95,6441.5,6314.9]},{"id":118831,"lat":18.0,"lon":-71.25,"elev":1067,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[29.442857,29.9,30.157143,30.242857,30.257143,30.557143,30.785714,29.942857,30.485714,30.285714,30.471429,29.828571,30.328571,29.614286,29.857143,30.457143,29.242857,30.171429,29.6,30.157143,30.385714,28.885714,29.814286,31.171429,30.457143,30.957143],"t7s":[29.442857,29.9,30.157143,30.242857,30.257143,30.557143,30.785714,29.942857,30.485714,30.285714,30.642857,29.828571,30.328571,29.614286,29.857143,30.457143,29.242857,30.171429,29.6,30.185714,30.385714,28.885714,29.814286,31.171429,30.457143,30.957143],"tmin":[17.9,19.2,19.5,18.5,19.3,19.1,19.7,19.9,18.6,18.8,18.9,19.3,19.8,19.6,20.0,20.4,20.2,18.8,18.3,19.4,20.2,19.4,19.3,19.2,18.9,19.6],"dd":[5603.1,5705.35,5725.7,5702.9,5674.9,5741.8,5762.7,5703.8,5626.1,5648.9,5797.1,5557.45,5594.85,5635.6,5666.45,5663.8,5613.25,5557.1,5457.45,5692.0,5701.0,5434.55,5574.55,5841.95,5858.35,5728.05]},{"id":119408,"lat":18.5,"lon":-70.625,"elev":568,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[30.742857,30.5,30.685714,30.771429,30.528571,31.4,32.285714,31.285714,31.3,31.257143,31.128571,30.771429,31.085714,30.342857,30.442857,32.4,31.1,31.085714,30.728571,31.614286,31.714286,30.728571,31.071429,31.742857,31.328571,31.957143],"t7s":[30.742857,30.5,30.685714,30.771429,30.528571,31.4,32.285714,31.285714,31.3,31.257143,31.128571,30.771429,31.085714,30.342857,30.442857,32.4,31.1,31.028571,30.728571,31.614286,31.714286,30.728571,31.271429,31.742857,31.328571,31.957143],"tmin":[14.5,16.6,17.2,17.0,16.2,16.7,17.0,17.9,15.5,16.3,16.2,16.8,17.4,16.7,17.3,18.7,17.8,15.7,17.0,17.3,18.0,16.9,17.7,16.6,17.6,17.3],"dd":[5347.9,5460.8,5519.6,5492.25,5418.85,5504.0,5571.3,5496.3,5379.3,5448.45,5498.65,5329.35,5433.2,5459.35,5495.05,5556.5,5435.7,5424.95,5351.5,5595.3,5581.35,5221.65,5384.2,5634.15,5609.6,5520.35]},{"id":120561,"lat":19.5,"lon":-70.0,"elev":19,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[32.3,32.485714,32.085714,32.585714,32.342857,33.542857,33.071429,32.642857,32.614286,32.385714,32.257143,32.114286,33.257143,32.728571,32.085714,34.257143,32.4,32.628571,32.042857,32.928571,33.1,31.642857,32.671429,34.442857,33.028571,32.971429],"t7s":[32.3,32.514286,32.085714,32.785714,32.514286,33.571429,33.071429,32.642857,32.614286,32.385714,32.614286,32.114286,33.257143,32.728571,32.514286,34.257143,32.4,32.628571,32.042857,32.914286,33.1,32.0,32.671429,34.442857,33.028571,33.342857],"tmin":[18.7,20.3,20.2,20.3,19.0,19.0,19.4,20.5,19.8,19.1,18.7,19.9,20.1,19.9,20.6,20.9,20.3,19.5,19.7,20.7,20.1,20.3,21.0,19.4,19.7,19.7],"dd":[6143.2,6223.7,6271.95,6312.5,6121.3,6208.6,6289.5,6296.9,6149.55,6138.05,6145.7,6073.0,6171.4,6191.7,6291.15,6324.2,6247.05,6141.65,6157.35,6371.15,6356.6,6154.35,6256.3,6498.5,6358.5,6302.85]},{"id":120560,"lat":19.5,"lon":-70.625,"elev":314,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[34.228571,34.171429,33.842857,34.714286,33.571429,35.057143,35.042857,34.4,35.171429,34.371429,33.757143,33.185714,34.971429,34.842857,33.657143,36.757143,33.571429,34.157143,34.357143,35.557143,34.785714,33.685714,34.057143,36.471429,34.414286,35.071429],"t7s":[34.228571,34.171429,33.842857,34.585714,33.714286,35.057143,35.042857,34.4,35.171429,34.371429,34.057143,33.728571,34.971429,34.842857,34.3,37.2,33.571429,34.157143,34.671429,35.142857,34.785714,33.685714,34.171429,36.471429,34.414286,35.071429],"tmin":[14.3,16.8,16.2,17.2,15.8,15.3,15.5,17.4,15.7,15.2,15.3,16.0,16.2,15.9,16.6,18.0,17.1,15.7,15.9,17.1,17.5,18.0,17.3,15.6,15.9,16.4],"dd":[5816.7,5927.5,6024.6,6036.15,5795.35,5923.85,6005.5,6011.15,5848.85,5842.9,5837.05,5758.65,5840.95,5942.35,6052.85,6095.5,5950.9,5851.3,5877.25,6164.7,6066.05,5792.15,5963.3,6248.65,6062.35,5998.6]},{"id":120562,"lat":19.5,"lon":-69.375,"elev":-2543,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[29.957143,30.042857,29.414286,29.614286,29.242857,29.857143,29.557143,29.971429,29.457143,29.2,29.557143,29.1,29.242857,30.071429,29.371429,30.642857,29.471429,29.671429,29.057143,30.4,29.742857,29.628571,29.828571,30.685714,30.685714,30.285714],"t7s":[29.957143,30.371429,29.414286,29.614286,29.371429,29.871429,29.557143,29.971429,29.814286,29.285714,29.914286,29.1,29.414286,30.071429,29.528571,30.9,29.485714,29.671429,29.057143,30.4,29.742857,29.628571,29.828571,30.685714,30.685714,30.357143],"tmin":[22.2,23.3,23.2,24.1,23.2,22.5,22.7,23.9,23.2,22.9,22.8,22.8,23.2,23.2,24.1,23.9,24.1,23.5,23.3,24.0,23.8,24.0,24.2,23.4,23.6,24.1],"dd":[6091.4,6171.55,6172.1,6245.75,6090.65,6184.3,6226.9,6260.4,6105.05,6097.3,6190.0,6069.05,6162.05,6116.85,6202.35,6250.15,6270.8,6175.1,6138.2,6294.35,6358.35,6276.8,6260.95,6458.35,6478.2,6363.6]},{"id":119407,"lat":18.5,"lon":-71.25,"elev":125,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[33.071429,32.757143,33.514286,33.114286,33.442857,33.728571,34.2,34.028571,34.1,34.185714,33.914286,33.214286,32.742857,32.814286,32.814286,34.271429,33.857143,33.985714,33.357143,33.871429,34.171429,34.0,33.542857,34.228571,33.757143,34.928571],"t7s":[33.071429,32.757143,33.514286,33.114286,33.442857,34.0,34.2,34.1,34.1,34.185714,33.914286,33.214286,32.742857,32.814286,32.814286,34.271429,33.857143,33.842857,33.442857,33.871429,34.171429,34.0,33.542857,34.228571,33.728571,34.928571],"tmin":[14.8,16.8,16.3,16.1,16.6,16.7,17.1,18.0,16.6,15.6,15.7,16.4,17.2,17.3,18.5,18.2,17.6,16.8,16.4,17.4,17.9,17.2,18.0,17.6,17.0,17.9],"dd":[5834.5,5956.3,6017.2,5907.75,5956.4,5987.15,6026.4,5926.3,5930.15,5943.1,6053.15,5803.65,5835.35,5928.7,5952.5,6030.75,5928.75,5890.95,5834.05,6034.2,6067.25,5727.75,5964.15,6113.95,6141.4,6052.0]},{"id":119409,"lat":18.5,"lon":-70.0,"elev":60,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[32.928571,32.9,32.685714,32.728571,32.485714,32.971429,33.985714,33.328571,33.142857,33.385714,33.257143,32.1,33.357143,32.285714,32.8,34.214286,32.971429,32.6,32.728571,33.442857,33.771429,32.6,32.842857,33.314286,33.028571,33.657143],"t7s":[32.928571,32.9,32.685714,32.928571,32.485714,33.042857,33.985714,33.542857,33.142857,33.385714,33.057143,31.914286,33.285714,32.285714,32.8,34.214286,32.971429,32.728571,32.728571,33.442857,33.771429,32.6,32.957143,33.314286,33.028571,33.857143],"tmin":[16.9,18.8,19.3,20.0,18.3,17.8,18.3,19.6,17.7,18.1,17.8,18.9,19.7,19.1,19.5,20.6,19.8,17.5,18.6,19.9,19.8,18.9,19.5,18.4,18.8,18.9],"dd":[6173.7,6262.35,6315.75,6293.15,6177.55,6221.55,6330.15,6274.4,6134.65,6208.5,6217.45,6083.1,6217.85,6236.65,6280.4,6335.7,6207.55,6169.3,6137.2,6358.5,6328.7,6041.75,6164.55,6373.35,6365.2,6275.8]},{"id":119411,"lat":18.5,"lon":-68.75,"elev":66,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[33.314286,34.057143,33.028571,34.428571,33.3,33.557143,34.271429,34.114286,33.814286,33.814286,33.814286,32.471429,35.742857,33.4,33.928571,33.985714,32.828571,32.028571,32.614286,33.471429,33.642857,33.0,32.2,33.357143,33.442857,33.042857],"t7s":[33.314286,34.057143,33.085714,34.428571,33.3,33.828571,34.271429,34.142857,33.814286,33.828571,34.0,32.471429,35.742857,33.657143,33.971429,33.985714,32.828571,32.528571,32.871429,33.471429,33.642857,33.1,32.257143,33.357143,33.442857,33.042857],"tmin":[17.7,20.1,20.2,21.5,19.8,18.4,20.0,21.5,20.5,20.4,19.7,20.3,20.3,20.9,21.2,21.4,21.0,19.2,19.6,21.0,21.7,20.8,20.1,19.2,19.9,19.3],"dd":[6462.45,6554.25,6542.55,6549.05,6491.35,6488.05,6558.85,6693.15,6507.7,6574.15,6640.3,6411.9,6640.4,6579.7,6724.95,6517.25,6366.45,6272.9,6296.7,6576.25,6513.9,6269.7,6267.55,6468.5,6505.25,6368.5]},{"id":119410,"lat":18.5,"lon":-69.375,"elev":46,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[33.985714,33.971429,33.371429,33.8,33.242857,33.857143,34.014286,33.871429,33.771429,33.885714,33.6,32.428571,34.357143,32.971429,33.757143,35.085714,33.328571,32.971429,33.314286,34.142857,34.128571,33.128571,33.114286,33.942857,33.371429,33.957143],"t7s":[33.985714,33.971429,33.371429,33.871429,33.242857,33.857143,34.014286,34.1,33.771429,33.885714,33.6,32.428571,34.357143,32.928571,33.757143,35.085714,33.328571,33.371429,33.314286,34.142857,34.128571,33.0,33.2,33.871429,33.457143,34.014286],"tmin":[17.5,20.3,20.3,21.2,20.0,18.5,19.2,20.8,19.1,19.6,18.9,20.0,20.4,20.2,20.6,21.0,20.8,18.4,19.4,20.5,21.0,20.2,20.2,19.3,19.5,19.0],"dd":[6450.95,6520.6,6529.1,6554.4,6434.45,6439.35,6567.3,6546.0,6373.95,6450.15,6419.85,6301.75,6489.3,6483.9,6551.45,6563.8,6416.05,6361.7,6367.65,6603.95,6568.35,6331.5,6370.6,6562.75,6536.95,6445.5]},{"id":120559,"lat":19.5,"lon":-71.25,"elev":219,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[36.442857,36.157143,36.857143,36.642857,36.242857,35.585714,36.342857,36.028571,36.5,35.571429,34.714286,34.814286,36.514286,36.014286,36.057143,37.485714,35.328571,35.185714,36.4,37.1,36.842857,35.457143,35.8,37.314286,36.042857,36.885714],"t7s":[36.442857,36.1,36.857143,36.642857,36.242857,35.585714,36.214286,36.114286,36.5,35.7,35.342857,35.228571,36.742857,36.014286,36.057143,37.771429,35.328571,35.628571,36.657143,37.1,36.842857,35.457143,35.8,37.314286,36.042857,36.885714],"tmin":[12.9,14.3,14.7,16.2,14.0,14.6,14.2,16.3,12.8,14.7,13.8,14.5,15.7,15.1,16.6,17.3,16.1,14.6,15.2,16.4,16.1,15.5,16.2,14.6,14.3,16.2],"dd":[5903.05,6075.95,6236.95,6147.25,5890.75,5982.45,6091.2,6048.8,5939.15,5968.3,5865.7,5818.4,5907.1,6098.9,6208.35,6241.9,6001.9,5858.65,6029.15,6289.9,6148.0,5772.25,6114.4,6344.95,6075.15,6080.25]},{"id":119406,"lat":18.5,"lon":-71.875,"elev":32,"years":[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025],"t7f":[33.614286,33.428571,33.7,33.528571,34.1,34.014286,34.4,34.0,34.314286,34.0,34.314286,32.642857,32.557143,32.371429,32.971429,34.571429,34.228571,33.385714,33.257143,33.871429,34.785714,33.671429,33.428571,35.057143,34.742857,35.242857],"t7s":[33.614286,33.428571,33.7,33.528571,34.1,34.271429,34.4,34.414286,34.314286,34.0,34.314286,32.642857,32.557143,32.371429,33.142857,34.571429,34.228571,33.557143,33.257143,33.871429,34.785714,33.671429,33.542857,35.042857,34.742857,35.242857],"tmin":[12.8,16.3,15.4,14.1,14.9,13.5,15.5,16.0,14.7,13.6,13.6,14.5,15.7,15.7,17.0,15.8,16.1,14.5,14.8,16.0,16.4,15.4,16.1,14.8,15.2,16.2],"dd":[5653.6,5816.9,5888.85,5749.95,5737.85,5780.65,5837.1,5747.5,5737.65,5768.0,5846.4,5552.8,5596.4,5765.45,5812.9,5890.1,5731.95,5644.45,5684.85,5908.2,5903.3,5551.1,5883.6,6096.5,6011.5,5871.6]}];
@@ -1511,9 +1727,30 @@ function nearestStation(lat, lon) {
   return { st: best, dist };
 }
 
-/* Cálculo dinámico principal */
-function computePG(lat, lon, opts) {
-  const { R, R_ah, order } = opts;
+/* Búsqueda espacial K-Nearest Neighbors */
+function findKNN(lat, lon, k = 4) {
+  const list = STATIONS.map(s => {
+    const d = Math.sqrt((s.lat - lat) ** 2 + (s.lon - lon) ** 2);
+    return { st: s, dist: d };
+  });
+  list.sort((a, b) => a.dist - b.dist);
+  const top = list.slice(0, k);
+  const eps = 1e-5;
+  const sumInv = top.reduce((acc, item) => acc + 1 / ((item.dist + eps) ** 2), 0);
+  top.forEach(item => {
+    item.weight = (1 / ((item.dist + eps) ** 2)) / sumInv;
+  });
+  return top;
+}
+
+/* Cálculo dinámico principal con ajuste de tráfico y velocidad (AASHTO M 323 / M 320) */
+function computePG(lat, lon, opts = {}) {
+  const R = opts.R ?? 0.98;
+  const R_ah = opts.R_ah ?? 0.98;
+  const order = opts.order ?? 't7f';
+  const esals = opts.esals ?? 3.0;
+  const speed = opts.speed ?? 'fast';
+
   const { st, dist } = nearestStation(lat, lon);
   const t7 = st[order], tmin = st.tmin, ddA = st.dd;
 
@@ -1548,12 +1785,31 @@ function computePG(lat, lon, opts) {
   const PG_H_rel = PG_H_d + Z_ah * (PG_H_d * CVPG / 100.0);
   const PG_ah = PG_MAX_COM.find(pg => pg >= PG_H_rel) ?? PG_MAX_COM[PG_MAX_COM.length - 1];
 
+  // Ajuste normativo AASHTO M 323 (Grade Bumping por Tráfico y Velocidad)
+  let bumping = 0;
+  let bumpReason = [];
+  if (esals > 30.0) { bumping += 2; bumpReason.push('Tráfico Extremo (>30M ESALs)'); }
+  else if (esals > 10.0) { bumping += 1; bumpReason.push('Tráfico Muy Pesado (>10M ESALs)'); }
+
+  if (speed === 'standing') { bumping += 2; bumpReason.push('Tránsito Detenido (<20 km/h)'); }
+  else if (speed === 'slow') { bumping += 1; bumpReason.push('Tránsito Lento (20-70 km/h)'); }
+
+  bumping = Math.min(bumping, 2); // Tope normativo recomendado
+
+  let idxAlto = PG_MAX_COM.indexOf(PG_alto);
+  if (idxAlto === -1) idxAlto = PG_MAX_COM.length - 1;
+  const idxBumping = Math.min(idxAlto + bumping, PG_MAX_COM.length - 1);
+  const PG_alto_ajustado = PG_MAX_COM[idxBumping];
+  const PG_com_ajustado = `PG ${PG_alto_ajustado}${PG_bajo}`;
+
   return {
     lat, lon, R, R_ah, st, dist, t7, tmin, ddA,
     T_air_max, T_air_min, sigma_air_max, sigma_air_min,
     z, log_hmax, T_pav_prom, sigma_pav_max, T_pav_alto, PG_alto,
     log_hmin, T_pav_prom_bajo, sigma_pav_min, z_bajo, T_pav_bajo, PG_bajo,
-    DD_prom, DD, Z_ah, PG_H_d, CVPG, PG_H_rel, PG_ah
+    DD_prom, DD, Z_ah, PG_H_d, CVPG, PG_H_rel, PG_ah,
+    esals, speed, bumping, bumpReason: bumpReason.join(' + ') || 'Sin salto de grado (+0°C)',
+    PG_alto_ajustado, PG_com_ajustado
   };
 }
 </script>
@@ -1568,26 +1824,130 @@ const state = {
   R: 0.98,
   ahFixed: false,
   sorted: false,
+  esals: 3.0,
+  speed: 'fast',
   heatMode: 'talto',
+  heatMethod: 'kriging', // 'kriging', 'voronoi', 'idw'
   heatEnabled: true,
-  heatOpacity: 0.75
+  heatOpacity: 0.75,
+  krigRange: 0.85,
+  krigNugget: 0.15,
+  krigSill: 1.20,
+  activeCatTab: 'stations'
 };
 
-/* ===== OFFLINE FALLBACK PARA LEAFLET.HEAT ===== */
-if (typeof L !== 'undefined' && !L.heatLayer) {
-  !function(){"use strict";function t(i){return this instanceof t?(this._canvas=i="string"==typeof i?document.getElementById(i):i,this._ctx=i.getContext("2d"),this._width=i.width,this._height=i.height,this._max=1,void this.clear()):new t(i)}t.prototype={defaultRadius:25,defaultGradient:{.4:"blue",.6:"cyan",.7:"lime",.8:"yellow",1:"red"},data:function(t,i){return this._data=t,this},max:function(t){return this._max=t,this},add:function(t){return this._data.push(t),this},clear:function(){return this._data=[],this},radius:function(t,i){i=i||15;var a=this._circle=document.createElement("canvas"),s=a.getContext("2d"),e=this._r=t+i;return a.width=a.height=2*e,s.shadowOffsetX=s.shadowOffsetY=200,s.shadowBlur=i,s.shadowColor="black",s.beginPath(),s.arc(e-200,e-200,t,0,2*Math.PI,!0),s.closePath(),s.fill(),this},gradient:function(t){var i=document.createElement("canvas"),a=i.getContext("2d"),s=a.createLinearGradient(0,0,0,256);i.width=1,i.height=256;for(var e in t)s.addColorStop(e,t[e]);return a.fillStyle=s,a.fillRect(0,0,1,256),this._grad=a.getImageData(0,0,1,256).data,this},draw:function(t){this._circle||this.radius(this.defaultRadius),this._grad||this.gradient(this.defaultGradient);var i=this._ctx;i.clearRect(0,0,this._width,this._height);for(var a,s=0,e=this._data.length;e>s;s++)a=this._data[s],i.globalAlpha=Math.max(a[2]/this._max,t||.05),i.drawImage(this._circle,a[0]-this._r,a[1]-this._r);var n=i.getImageData(0,0,this._width,this._height);return this._colorize(n.data,this._grad),i.putImageData(n,0,0),this},_colorize:function(t,i){for(var a,s=3,e=t.length;e>s;s+=4)a=4*t[s],a&&(t[s-3]=i[a],t[s-2]=i[a+1],t[s-1]=i[a+2])}},window.simpleheat=t}();
-  L.HeatLayer=(L.Layer?L.Layer:L.Class).extend({initialize:function(t,i){this._latlngs=t,L.setOptions(this,i)},setLatLngs:function(t){return this._latlngs=t,this.redraw()},addLatLng:function(t){return this._latlngs.push(t),this.redraw()},setOptions:function(t){return L.setOptions(this,t),this._heat&&this._updateOptions(),this.redraw()},redraw:function(){return!this._heat||this._frame||this._map._animating||(this._frame=L.Util.requestAnimFrame(this._redraw,this)),this},onAdd:function(t){this._map=t,this._canvas||this._initCanvas(),t._panes.overlayPane.appendChild(this._canvas),t.on("moveend",this._reset,this),t.options.zoomAnimation&&L.Browser.any3d&&t.on("zoomanim",this._animateZoom,this),this._reset()},onRemove:function(t){t.getPanes().overlayPane.removeChild(this._canvas),t.off("moveend",this._reset,this),t.options.zoomAnimation&&t.off("zoomanim",this._animateZoom,this)},addTo:function(t){return t.addLayer(this),this},_initCanvas:function(){var t=this._canvas=L.DomUtil.create("canvas","leaflet-heatmap-layer leaflet-layer"),i=L.DomUtil.testProp(["transformOrigin","WebkitTransformOrigin","msTransformOrigin"]);t.style[i]="50% 50%";var a=this._map.getSize();t.width=a.x,t.height=a.y;var s=this._map.options.zoomAnimation&&L.Browser.any3d;L.DomUtil.addClass(t,"leaflet-zoom-"+(s?"animated":"hide")),this._heat=simpleheat(t),this._updateOptions()},_updateOptions:function(){this._heat.radius(this.options.radius||this._heat.defaultRadius,this.options.blur),this.options.gradient&&this._heat.gradient(this.options.gradient),this.options.max&&this._heat.max(this.options.max)},_reset:function(){var t=this._map.containerPointToLayerPoint([0,0]);L.DomUtil.setPosition(this._canvas,t);var i=this._map.getSize();this._heat._width!==i.x&&(this._canvas.width=this._heat._width=i.x),this._heat._height!==i.y&&(this._canvas.height=this._heat._height=i.y),this._redraw()},_redraw:function(){var t,i,a,s,e,n,h,o,r,d=[],_=this._heat._r,l=this._map.getSize(),m=new L.Bounds(L.point([-_,-_]),l.add([_,_])),c=void 0===this.options.max?1:this.options.max,u=void 0===this.options.maxZoom?this._map.getMaxZoom():this.options.maxZoom,f=1/Math.pow(2,Math.max(0,Math.min(u-this._map.getZoom(),12))),g=_/2,p=[],v=this._map._getMapPanePos(),w=v.x%g,y=v.y%g;for(t=0,i=this._latlngs.length;i>t;t++)if(a=this._map.latLngToContainerPoint(this._latlngs[t]),m.contains(a)){e=Math.floor((a.x-w)/g)+2,n=Math.floor((a.y-y)/g)+2;var x=void 0!==this._latlngs[t].alt?this._latlngs[t].alt:void 0!==this._latlngs[t][2]?+this._latlngs[t][2]:1;r=x*f,p[n]=p[n]||[],s=p[n][e],s?(s[0]=(s[0]*s[2]+a.x*r)/(s[2]+r),s[1]=(s[1]*s[2]+a.y*r)/(s[2]+r),s[2]+=r):p[n][e]=[a.x,a.y,r]}for(t=0,i=p.length;i>t;t++)if(p[t])for(h=0,o=p[t].length;o>h;h++)s=p[t][h],s&&d.push([Math.round(s[0]),Math.round(s[1]),Math.min(s[2],c)]);this._heat.data(d).draw(this.options.minOpacity),this._frame=null},_animateZoom:function(t){var i=this._map.getZoomScale(t.zoom),a=this._map._getCenterOffset(t.center)._multiplyBy(-i).subtract(this._map._getMapPanePos());L.DomUtil.setTransform?L.DomUtil.setTransform(this._canvas,a,i):this._canvas.style[L.DomUtil.TRANSFORM]=L.DomUtil.getTranslateString(a)+" scale("+i+")"}});
-  L.heatLayer=function(t,i){return new L.HeatLayer(t,i)};
+/* ===== TEMA DUAL (DARK / LIGHT) ===== */
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  $('btn-theme-toggle').textContent = (theme === 'light') ? '🌙' : '☀️';
+  try { localStorage.setItem('superpave_theme', theme); } catch(e){}
+  if (window.chDist && window.chYear) {
+    const isDark = (theme !== 'light');
+    const colorText = isDark ? '#94a3b8' : '#475569';
+    const colorGrid = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+    [chDist, chYear].forEach(c => {
+      c.options.scales.x.grid.color = colorGrid;
+      c.options.scales.y.grid.color = colorGrid;
+      c.update();
+    });
+  }
+}
+$('btn-theme-toggle').addEventListener('click', () => {
+  const cur = document.documentElement.getAttribute('data-theme') || 'dark';
+  setTheme(cur === 'light' ? 'dark' : 'light');
+});
+
+/* ===== DICCIONARIO ESPACIAL LOCAL (OFFLINE RD GEOCODING) ===== */
+const RD_PROVINCES = [
+  { name: 'Distrito Nacional (Santo Domingo)', lat: 18.48, lon: -69.93, r: 0.12 },
+  { name: 'Santo Domingo', lat: 18.55, lon: -69.85, r: 0.35 },
+  { name: 'Santiago (Santiago de los Caballeros)', lat: 19.45, lon: -70.70, r: 0.35 },
+  { name: 'San Cristóbal', lat: 18.42, lon: -70.11, r: 0.30 },
+  { name: 'La Vega', lat: 19.22, lon: -70.53, r: 0.35 },
+  { name: 'Puerto Plata', lat: 19.79, lon: -70.69, r: 0.35 },
+  { name: 'San Pedro de Macorís', lat: 18.45, lon: -69.30, r: 0.28 },
+  { name: 'Duarte (San Francisco de Macorís)', lat: 19.30, lon: -70.25, r: 0.30 },
+  { name: 'La Romana', lat: 18.43, lon: -68.97, r: 0.25 },
+  { name: 'San Juan', lat: 18.81, lon: -71.23, r: 0.45 },
+  { name: 'Espaillat (Moca)', lat: 19.39, lon: -70.53, r: 0.25 },
+  { name: 'Azua', lat: 18.45, lon: -70.73, r: 0.40 },
+  { name: 'Barahona', lat: 18.21, lon: -71.10, r: 0.35 },
+  { name: 'Monte Plata', lat: 18.81, lon: -69.79, r: 0.35 },
+  { name: 'Peravia (Baní)', lat: 18.28, lon: -70.33, r: 0.25 },
+  { name: 'Monseñor Nouel (Bonao)', lat: 18.94, lon: -70.41, r: 0.28 },
+  { name: 'Valverde (Mao)', lat: 19.55, lon: -71.08, r: 0.25 },
+  { name: 'Sánchez Ramírez (Cotuí)', lat: 19.05, lon: -70.15, r: 0.25 },
+  { name: 'María Trinidad Sánchez (Nagua)', lat: 19.38, lon: -69.85, r: 0.30 },
+  { name: 'Monte Cristi', lat: 19.85, lon: -71.65, r: 0.40 },
+  { name: 'Samaná', lat: 19.20, lon: -69.33, r: 0.35 },
+  { name: 'Bahoruco (Neiba)', lat: 18.48, lon: -71.42, r: 0.30 },
+  { name: 'Hermanas Mirabal (Salcedo)', lat: 19.38, lon: -70.42, r: 0.20 },
+  { name: 'El Seibo', lat: 18.76, lon: -69.04, r: 0.35 },
+  { name: 'Hato Mayor', lat: 18.76, lon: -69.26, r: 0.30 },
+  { name: 'Dajabón', lat: 19.55, lon: -71.71, r: 0.25 },
+  { name: 'Elías Piña (Comendador)', lat: 18.88, lon: -71.70, r: 0.30 },
+  { name: 'San José de Ocoa', lat: 18.55, lon: -70.50, r: 0.25 },
+  { name: 'Santiago Rodríguez (Sabaneta)', lat: 19.48, lon: -71.34, r: 0.28 },
+  { name: 'Independencia (Jimaní)', lat: 18.49, lon: -71.85, r: 0.35 },
+  { name: 'Pedernales', lat: 18.04, lon: -71.74, r: 0.35 },
+  { name: 'La Altagracia (Punta Cana / Higüey)', lat: 18.62, lon: -68.71, r: 0.45 }
+];
+
+const RD_HIGHWAYS = [
+  { name: 'Autopista Duarte (RD-1)', lat1: 18.49, lon1: -69.95, lat2: 19.85, lon2: -71.65 },
+  { name: 'Carretera Sánchez (RD-2)', lat1: 18.44, lon1: -70.05, lat2: 18.88, lon2: -71.70 },
+  { name: 'Autovía del Este / Las Américas (RD-3)', lat1: 18.48, lon1: -69.80, lat2: 18.56, lon2: -68.37 },
+  { name: 'Carretera Mella (RD-4)', lat1: 18.50, lon1: -69.80, lat2: 18.76, lon2: -69.04 },
+  { name: 'Carretera Navarrete - Puerto Plata (RD-5)', lat1: 19.56, lon1: -70.87, lat2: 19.20, lon2: -69.33 }
+];
+
+let geocodeTimer = null;
+function lookupLocation(lat, lon) {
+  let bestProv = RD_PROVINCES[0], minDist = Infinity;
+  for (const p of RD_PROVINCES) {
+    const d = Math.sqrt((p.lat - lat) ** 2 + (p.lon - lon) ** 2);
+    if (d < minDist) { minDist = d; bestProv = p; }
+  }
+
+  let bestHwy = RD_HIGHWAYS[0], minHwyDist = Infinity;
+  for (const h of RD_HIGHWAYS) {
+    const midLat = (h.lat1 + h.lat2) / 2, midLon = (h.lon1 + h.lon2) / 2;
+    const d = Math.sqrt((midLat - lat) ** 2 + (midLon - lon) ** 2);
+    if (d < minHwyDist) { minHwyDist = d; bestHwy = h; }
+  }
+
+  $('geo-road').textContent = (minHwyDist < 0.65) ? bestHwy.name : 'Red Vial Troncal RD';
+  $('geo-details').textContent = `${bestProv.name} · ${f(lat, 3)}° N, ${f(lon, 3)}° W`;
+
+  if (geocodeTimer) clearTimeout(geocodeTimer);
+  geocodeTimer = setTimeout(() => {
+    if (typeof fetch === 'function') {
+      const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=14&addressdetails=1`;
+      fetch(url, { headers: { 'Accept-Language': 'es' } })
+        .then(res => res.json())
+        .then(data => {
+          if (data && data.address) {
+            const addr = data.address;
+            const road = addr.road || addr.highway || addr.suburb || bestHwy.name;
+            const prov = addr.state || addr.province || addr.county || bestProv.name;
+            const city = addr.city || addr.town || addr.village || '';
+            $('geo-road').textContent = road;
+            $('geo-details').textContent = `${city ? city + ', ' : ''}${prov} · ${f(lat, 3)}° N, ${f(lon, 3)}° W`;
+          }
+        })
+        .catch(() => {});
+    }
+  }, 400);
 }
 
 /* ===== TABS LOGIC ===== */
-document.querySelectorAll('.tab-btn').forEach(btn => {
+document.querySelectorAll('.stage-tabs .tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
-    document.querySelectorAll('.tab-btn').forEach(b => {
+    document.querySelectorAll('.stage-tabs .tab-btn').forEach(b => {
       b.classList.remove('active');
       b.setAttribute('aria-selected', 'false');
     });
-    document.querySelectorAll('.tab-pane').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.stage-content .tab-pane').forEach(p => p.classList.remove('active'));
     btn.classList.add('active');
     btn.setAttribute('aria-selected', 'true');
     const target = $(btn.dataset.tab);
@@ -1601,45 +1961,30 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
 /* ===== TOAST NOTIFICATION ===== */
 function showToast(msg) {
   const t = $('toast');
+  if (!t) return;
   t.textContent = msg;
   t.style.display = 'block';
   setTimeout(() => { t.style.display = 'none'; }, 2200);
 }
 
-/* ===== LEAFLET MAP & CAPAS TOTALMENTE LIBRES (SIN API KEY NI WATERMARK) ===== */
+/* ===== LEAFLET BASE MAP LAYERS ===== */
 const esriDark = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Dark_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 16,
-  attribution: '© Esri, HERE, Garmin'
+  maxZoom: 16, attribution: '© Esri, HERE, Garmin'
 });
-const esriSat = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19,
-  attribution: '© Esri, Maxar, Earthstar Geographics'
+const googleSat = L.tileLayer('https://mt1.google.com/vt/lyrs=y&x={x}&y={y}&z={z}', {
+  maxZoom: 19, attribution: '© Google Maps'
 });
 const esriTopo = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19,
-  attribution: '© Esri, USGS, NOAA'
+  maxZoom: 19, attribution: '© Esri, USGS'
 });
 const esriStreet = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 19,
-  attribution: '© Esri, HERE, Garmin, USGS'
-});
-const esriLight = L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/Canvas/World_Light_Gray_Base/MapServer/tile/{z}/{y}/{x}', {
-  maxZoom: 16,
-  attribution: '© Esri, HERE, Garmin'
+  maxZoom: 19, attribution: '© Esri, HERE'
 });
 const openTopo = L.tileLayer('https://{s}.tile.opentopomap.org/{z}/{x}/{y}.png', {
-  maxZoom: 17,
-  attribution: '© OpenTopoMap contributors'
+  maxZoom: 17, attribution: '© OpenTopoMap'
 });
 
-const baseMaps = {
-  "🌌 Plano Técnico Oscuro (HUD)": esriDark,
-  "🛰️ Satélite de Alta Resolución": esriSat,
-  "🚗 Calles & Topografía (Esri)": esriTopo,
-  "🛣️ Red Vial Detallada": esriStreet,
-  "⚪ Plano Claro Minimalista": esriLight,
-  "🏔️ Relieve OpenTopoMap": openTopo
-};
+const tileLayers = { esriDark, googleSat, esriTopo, esriStreet, openTopo };
 
 const map = L.map('map', {
   zoomControl: true,
@@ -1647,42 +1992,101 @@ const map = L.map('map', {
 }).setView([18.75, -70.2], 8);
 
 window.addEventListener('resize', () => map.invalidateSize());
-setTimeout(() => map.invalidateSize(), 300);
 
-const icoSt = L.divIcon({ className: '', html: '<span style="display:block;width:12px;height:12px;border-radius:50%;border:2px solid #00f0ff;background:rgba(0,240,255,0.4);box-shadow:0 0 8px #00f0ff"></span>', iconSize: [12, 12], iconAnchor: [6, 6] });
-const icoSel = L.divIcon({ className: '', html: '<span style="display:block;width:16px;height:16px;border-radius:50%;border:2px solid #ff6b2c;background:#ff6b2c;box-shadow:0 0 16px #ff6b2c"></span>', iconSize: [16, 16], iconAnchor: [8, 8] });
+document.querySelectorAll('input[name="basemap"]').forEach(radio => {
+  radio.addEventListener('change', e => {
+    Object.values(tileLayers).forEach(l => map.removeLayer(l));
+    const selected = tileLayers[e.target.value] || esriDark;
+    map.addLayer(selected);
+  });
+});
+
+/* ===== MARCADORES DE ESTACIONES Y PIN DEL PROYECTO ===== */
+const icoSt = L.divIcon({ className: '', html: '<span style="display:block;width:12px;height:12px;border-radius:50%;border:2px solid #00f0ff;background:rgba(0,240,255,0.45);box-shadow:0 0 8px #00f0ff"></span>', iconSize: [12, 12], iconAnchor: [6, 6] });
+const icoSel = L.divIcon({ className: '', html: '<span style="display:block;width:18px;height:18px;border-radius:50%;border:2px solid #ff6b2c;background:#ff6b2c;box-shadow:0 0 16px #ff6b2c"></span>', iconSize: [18, 18], iconAnchor: [9, 9] });
 const icoPin = L.divIcon({ className: '', html: '<div style="width:24px;height:24px;position:relative;display:flex;align-items:center;justify-content:center"><span style="position:absolute;width:24px;height:24px;border:2px dashed #00f0ff;border-radius:50%"></span><span style="display:block;width:10px;height:10px;background:#ff6b2c;border:2px solid #fff;border-radius:2px;transform:rotate(45deg);box-shadow:0 0 10px #ff6b2c"></span></div>', iconSize: [24, 24], iconAnchor: [12, 12] });
 
 const stMarkers = {};
 const stationLayerGroup = L.layerGroup();
 STATIONS.forEach(s => {
-  const m = L.marker([s.lat, s.lon], { icon: icoSt, keyboard: false })
-    .bindTooltip(`MERRA ${s.id} · ${s.elev}m`, { direction: 'top' });
+  const m = L.marker([s.lat, s.lon], { icon: icoSt, keyboard: false });
+  
+  const popHtml = `
+    <div class="st-pop-content">
+      <div class="st-pop-title">ESTACIÓN MERRA ${s.id}</div>
+      <div class="st-pop-meta">
+        Coordenadas: ${s.lat}°, ${s.lon}°<br>
+        Elevación: ${s.elev} m | Registros: ${s.years.length} años<br>
+        T. Máx (7d): ${f(mean(s.t7f))} °C | T. Mín: ${f(mean(s.tmin))} °C
+      </div>
+      <button type="button" class="btn-select-st" onclick="selectStation(${s.id})">Seleccionar esta Estación</button>
+    </div>
+  `;
+  m.bindPopup(popHtml, { className: 'hud-station-popup' });
   stMarkers[s.id] = m;
   stationLayerGroup.addLayer(m);
 });
 stationLayerGroup.addTo(map);
 
+window.selectStation = function(id) {
+  const s = STATIONS.find(x => x.id === id);
+  if (s) {
+    setCoord(s.lat, s.lon);
+    map.setView([s.lat, s.lon], Math.max(map.getZoom(), 9));
+    showToast(`Estación MERRA ${id} seleccionada`);
+  }
+};
+
 const pin = L.marker([state.lat, state.lon], { icon: icoPin, draggable: true, zIndexOffset: 1000 });
 const link = L.polyline([], { color: '#00f0ff', weight: 2.5, dashArray: '4 6', opacity: 0.85 });
 const projectLayerGroup = L.layerGroup([link, pin]).addTo(map);
 
-/* ===== MOTOR DEL MAPA DE CALOR (INTERPOLACIÓN TÉRMICA CONTINUA) ===== */
-let heatLayer = L.heatLayer([], {
-  radius: 36,
-  blur: 24,
-  maxZoom: 11,
-  max: 1.0,
-  minOpacity: 0.35
-});
-if (state.heatEnabled) heatLayer.addTo(map);
+/* ===== K-NN SPIDER LINES (LÍNEAS PUNTEADAS AL MOVER EL RATÓN) ===== */
+const spiderGroup = L.layerGroup().addTo(map);
+const spiderLines = [
+  L.polyline([], { color: '#00f0ff', weight: 2, dashArray: '3, 6', opacity: 0.8 }),
+  L.polyline([], { color: '#00f0ff', weight: 1.8, dashArray: '3, 6', opacity: 0.65 }),
+  L.polyline([], { color: '#00f0ff', weight: 1.5, dashArray: '3, 6', opacity: 0.5 }),
+  L.polyline([], { color: '#00f0ff', weight: 1.2, dashArray: '3, 6', opacity: 0.4 })
+];
+spiderLines.forEach(l => spiderGroup.addLayer(l));
 
-const overlayMaps = {
-  "🔥 Capa Térmica (Heatmap)": heatLayer,
-  "📍 Estaciones MERRA-2 (44)": stationLayerGroup,
-  "📌 Ubicación y Enlace": projectLayerGroup
-};
-L.control.layers(baseMaps, overlayMaps, { position: 'topright', collapsed: false }).addTo(map);
+/* ===== FLOATING HUD TOOLTIP INTERACTION ===== */
+const hudTooltip = $('hud-cursor-tooltip');
+map.on('mousemove', e => {
+  const lat = e.latlng.lat, lon = e.latlng.lng;
+  const knn = findKNN(lat, lon, 4);
+
+  // 1. Actualizar spider lines
+  knn.forEach((item, i) => {
+    if (spiderLines[i]) {
+      spiderLines[i].setLatLngs([[lat, lon], [item.st.lat, item.st.lon]]);
+      spiderLines[i].setStyle({ opacity: Math.max(0.2, item.weight * 1.5) });
+    }
+  });
+
+  // 2. Posicionar tooltip
+  if (hudTooltip) {
+    hudTooltip.style.left = (e.containerPoint.x + 15) + 'px';
+    hudTooltip.style.top = (e.containerPoint.y + 15) + 'px';
+    hudTooltip.style.opacity = '1';
+
+    $('tt-coord').textContent = `${f(lat, 3)}° N, ${f(lon, 3)}° W`;
+    const cfg = THERMAL_CONFIG[state.heatMode] || THERMAL_CONFIG.talto;
+    const valInterp = knn.reduce((acc, item) => acc + item.weight * cfg.getVal(item.st), 0);
+    $('tt-val').textContent = `${cfg.title.split('(')[0].trim()}: ${f(valInterp, 2)} ${cfg.unit}`;
+    $('tt-knn').textContent = `K-NN: ${knn.map(k => 'St ' + k.st.id + ' (' + Math.round(k.weight * 100) + '%)').join(' | ')}`;
+  }
+});
+
+map.on('mouseout', () => {
+  if (hudTooltip) hudTooltip.style.opacity = '0';
+  spiderLines.forEach(l => l.setLatLngs([]));
+});
+
+/* ===== MOTOR KRIGING 2D ORDINARIO & VORONOI CANVAS ===== */
+let heatLayer = null;
+let voronoiLayerGroup = L.layerGroup();
 
 const THERMAL_CONFIG = {
   talto: {
@@ -1728,16 +2132,38 @@ const THERMAL_CONFIG = {
   }
 };
 
+/* Resolución de sistema lineal para Kriging Ordinario */
+function solveLinearSystem(A, b) {
+  const n = b.length;
+  for (let i = 0; i < n; i++) {
+    let maxRow = i;
+    for (let k = i + 1; k < n; k++) {
+      if (Math.abs(A[k][i]) > Math.abs(A[maxRow][i])) maxRow = k;
+    }
+    const tmpA = A[i]; A[i] = A[maxRow]; A[maxRow] = tmpA;
+    const tmpB = b[i]; b[i] = b[maxRow]; b[maxRow] = tmpB;
+
+    for (let k = i + 1; k < n; k++) {
+      const c = -A[k][i] / (A[i][i] || 1e-12);
+      for (let j = i; j < n; j++) {
+        if (i === j) A[k][j] = 0;
+        else A[k][j] += c * A[i][j];
+      }
+      b[k] += c * b[i];
+    }
+  }
+  const x = new Array(n).fill(0);
+  for (let i = n - 1; i >= 0; i--) {
+    let sum = 0;
+    for (let j = i + 1; j < n; j++) sum += A[i][j] * x[j];
+    x[i] = (b[i] - sum) / (A[i][i] || 1e-12);
+  }
+  return x;
+}
+
 function updateHeatmap() {
-  if (!heatLayer) return;
   const cfg = THERMAL_CONFIG[state.heatMode] || THERMAL_CONFIG.talto;
-  
-  // 1. Valores en estaciones
-  const stVals = STATIONS.map(s => ({
-    lat: s.lat,
-    lon: s.lon,
-    val: cfg.getVal(s)
-  }));
+  const stVals = STATIONS.map(s => ({ lat: s.lat, lon: s.lon, val: cfg.getVal(s) }));
 
   let minV = Infinity, maxV = -Infinity;
   stVals.forEach(v => {
@@ -1745,55 +2171,135 @@ function updateHeatmap() {
     if (v.val > maxV) maxV = v.val;
   });
   if (Math.abs(maxV - minV) < 1e-4) maxV = minV + 1.0;
-
-  // 2. Grilla continua IDW sobre el territorio dominicano
-  const heatPts = [];
   const span = maxV - minV;
-  for (let lat = 17.4; lat <= 20.0; lat += 0.07) {
-    for (let lon = -72.1; lon <= -68.2; lon += 0.07) {
-      let nearest = Infinity, num = 0, den = 0;
-      for (const s of stVals) {
-        const d = Math.sqrt((s.lat - lat) ** 2 + (s.lon - lon) ** 2);
-        if (d < nearest) nearest = d;
-        const w = 1 / ((d + 0.01) ** 2);
-        num += w * s.val;
-        den += w;
+
+  if (voronoiLayerGroup) voronoiLayerGroup.clearLayers();
+  if (map.hasLayer(voronoiLayerGroup)) map.removeLayer(voronoiLayerGroup);
+
+  if (!state.heatEnabled) {
+    if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+    const leg = $('thermal-legend');
+    if (leg) leg.style.display = 'none';
+    return;
+  }
+
+  const leg = $('thermal-legend');
+  if (leg) leg.style.display = 'block';
+
+  // 1. MODO VORONOI
+  if (state.heatMethod === 'voronoi') {
+    if (heatLayer && map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
+
+    const step = 0.055;
+    for (let lat = 17.5; lat <= 20.0; lat += step) {
+      for (let lon = -72.0; lon <= -68.3; lon += step) {
+        let bestDist = Infinity, bestSt = stVals[0];
+        for (const s of stVals) {
+          const d = (s.lat - lat) ** 2 + (s.lon - lon) ** 2;
+          if (d < bestDist) { bestDist = d; bestSt = s; }
+        }
+        if (bestDist < 0.35) {
+          const ratio = Math.min(1, Math.max(0, (bestSt.val - minV) / span));
+          const r = Math.round(255 * ratio);
+          const g = Math.round(220 * (1 - Math.abs(ratio - 0.5) * 2));
+          const b = Math.round(255 * (1 - ratio));
+          const color = `rgb(${r},${g},${b})`;
+
+          const bounds = [[lat - step/2, lon - step/2], [lat + step/2, lon + step/2]];
+          const rect = L.rectangle(bounds, {
+            stroke: false,
+            fillColor: color,
+            fillOpacity: state.heatOpacity * 0.75
+          });
+          voronoiLayerGroup.addLayer(rect);
+        }
       }
-      if (nearest <= 0.48) {
-        const val = num / den;
-        const intensity = Math.min(1, Math.max(0, (val - minV) / span));
-        heatPts.push([+lat.toFixed(4), +lon.toFixed(4), +intensity.toFixed(3)]);
+    }
+    voronoiLayerGroup.addTo(map);
+
+  } else {
+    // 2. MODO KRIGING 2D / IDW
+    if (!heatLayer) {
+      if (typeof L.heatLayer === 'function') {
+        heatLayer = L.heatLayer([], { radius: 36, blur: 24, maxZoom: 11, max: 1.0, minOpacity: 0.35 });
       }
+    }
+
+    const heatPts = [];
+    const a = state.krigRange, c0 = state.krigNugget, c = state.krigSill;
+    const gamma = h => (h <= 0) ? 0 : (h <= a ? c0 + c * (1.5 * (h / a) - 0.5 * ((h / a) ** 3)) : c0 + c);
+
+    for (let lat = 17.4; lat <= 20.0; lat += 0.065) {
+      for (let lon = -72.1; lon <= -68.2; lon += 0.065) {
+        let nearest = Infinity;
+        stVals.forEach(s => {
+          const d = Math.sqrt((s.lat - lat) ** 2 + (s.lon - lon) ** 2);
+          if (d < nearest) nearest = d;
+        });
+
+        if (nearest <= 0.46) {
+          let val = 0;
+          if (state.heatMethod === 'kriging') {
+            const sub = stVals.slice().sort((p1, p2) => {
+              const d1 = (p1.lat - lat)**2 + (p1.lon - lon)**2;
+              const d2 = (p2.lat - lat)**2 + (p2.lon - lon)**2;
+              return d1 - d2;
+            }).slice(0, 6);
+
+            const m = sub.length;
+            const A = Array.from({ length: m + 1 }, () => new Array(m + 1).fill(0));
+            const B = new Array(m + 1).fill(1);
+
+            for (let i = 0; i < m; i++) {
+              for (let j = 0; j < m; j++) {
+                const dij = Math.sqrt((sub[i].lat - sub[j].lat)**2 + (sub[i].lon - sub[j].lon)**2);
+                A[i][j] = gamma(dij);
+              }
+              A[i][m] = 1;
+              A[m][i] = 1;
+              const d0 = Math.sqrt((sub[i].lat - lat)**2 + (sub[i].lon - lon)**2);
+              B[i] = gamma(d0);
+            }
+            A[m][m] = 0;
+            B[m] = 1;
+
+            const w = solveLinearSystem(A, B);
+            val = sub.reduce((acc, s, idx) => acc + (w[idx] || 0) * s.val, 0);
+          } else {
+            let num = 0, den = 0;
+            stVals.forEach(s => {
+              const d = Math.sqrt((s.lat - lat) ** 2 + (s.lon - lon) ** 2);
+              const w = 1 / ((d + 0.01) ** 2);
+              num += w * s.val; den += w;
+            });
+            val = num / den;
+          }
+
+          const intensity = Math.min(1, Math.max(0, (val - minV) / span));
+          heatPts.push([+lat.toFixed(4), +lon.toFixed(4), +intensity.toFixed(3)]);
+        }
+      }
+    }
+
+    stVals.forEach(s => {
+      const intensity = Math.min(1, Math.max(0, (s.val - minV) / span));
+      heatPts.push([s.lat, s.lon, +intensity.toFixed(3)]);
+    });
+
+    if (heatLayer) {
+      heatLayer.setLatLngs(heatPts);
+      heatLayer.setOptions({
+        radius: 36,
+        blur: 24,
+        maxZoom: 11,
+        max: 1.0,
+        minOpacity: state.heatOpacity * 0.45,
+        gradient: cfg.gradient
+      });
+      if (!map.hasLayer(heatLayer)) map.addLayer(heatLayer);
     }
   }
 
-  // Puntos clave de estaciones
-  stVals.forEach(s => {
-    const intensity = Math.min(1, Math.max(0, (s.val - minV) / span));
-    heatPts.push([s.lat, s.lon, +intensity.toFixed(3)]);
-  });
-
-  // 3. Renderizar capa
-  heatLayer.setLatLngs(heatPts);
-  heatLayer.setOptions({
-    radius: 36,
-    blur: 24,
-    maxZoom: 11,
-    max: 1.0,
-    minOpacity: state.heatOpacity * 0.45,
-    gradient: cfg.gradient
-  });
-
-  const leg = $('thermal-legend');
-  if (state.heatEnabled) {
-    if (!map.hasLayer(heatLayer)) map.addLayer(heatLayer);
-    if (leg) leg.style.display = 'block';
-  } else {
-    if (map.hasLayer(heatLayer)) map.removeLayer(heatLayer);
-    if (leg) leg.style.display = 'none';
-  }
-
-  // 4. Actualizar textos de la leyenda
   const legTitle = $('thermal-legend-title');
   const legBar = $('thermal-bar');
   const thMin = $('th-min'), thMid = $('th-mid'), thMax = $('th-max');
@@ -1804,21 +2310,23 @@ function updateHeatmap() {
   if (thMax) thMax.textContent = `${f(maxV, 1)} ${cfg.unit}`;
 }
 
-// Event Listeners del Mapa de Calor
 $('chk-heat').addEventListener('change', e => {
   state.heatEnabled = e.target.checked;
   updateHeatmap();
-  showToast(state.heatEnabled ? 'Mapa de calor activado' : 'Mapa de calor ocultado');
+  showToast(state.heatEnabled ? 'Capa térmica activada' : 'Capa térmica oculta');
 });
 
-document.querySelectorAll('.heat-btn').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.heat-btn').forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    state.heatMode = btn.dataset.mode;
-    updateHeatmap();
-    showToast(`Variable térmica: ${btn.textContent.trim()}`);
-  });
+$('sel-interp-method').addEventListener('change', e => {
+  state.heatMethod = e.target.value;
+  $('sb-method').textContent = (state.heatMethod === 'voronoi') ? 'VORONOI (THIESSEN)' : (state.heatMethod === 'kriging' ? 'KRIGING 2D ORDINARIO' : 'IDW PONDERADO');
+  $('kriging-params-wrap').style.display = (state.heatMethod === 'kriging') ? 'block' : 'none';
+  updateHeatmap();
+  showToast(`Método: ${$('sel-interp-method').options[$('sel-interp-method').selectedIndex].text}`);
+});
+
+$('sel-heat-var').addEventListener('change', e => {
+  state.heatMode = e.target.value;
+  updateHeatmap();
 });
 
 $('heat-opacity').addEventListener('input', e => {
@@ -1827,23 +2335,16 @@ $('heat-opacity').addEventListener('input', e => {
   updateHeatmap();
 });
 
-map.on('overlayadd', e => {
-  if (e.layer === heatLayer) {
-    state.heatEnabled = true;
-    $('chk-heat').checked = true;
-    const leg = $('thermal-legend');
-    if (leg) leg.style.display = 'block';
-  }
-});
-map.on('overlayremove', e => {
-  if (e.layer === heatLayer) {
-    state.heatEnabled = false;
-    $('chk-heat').checked = false;
-    const leg = $('thermal-legend');
-    if (leg) leg.style.display = 'none';
-  }
+['krig-range', 'krig-nugget', 'krig-sill'].forEach(id => {
+  $(id).addEventListener('input', () => {
+    state.krigRange = parseFloat($('krig-range').value) || 0.85;
+    state.krigNugget = parseFloat($('krig-nugget').value) || 0.15;
+    state.krigSill = parseFloat($('krig-sill').value) || 1.20;
+    if (state.heatMethod === 'kriging') updateHeatmap();
+  });
 });
 
+/* ===== COORDENADAS Y EVENTOS DEL MAPA ===== */
 pin.on('dragend', e => setCoord(e.target.getLatLng().lat, e.target.getLatLng().lng));
 map.on('click', e => setCoord(e.latlng.lat, e.latlng.lng));
 
@@ -1852,6 +2353,7 @@ function setCoord(lat, lon) {
   state.lon = +lon.toFixed(5);
   $('in-lat').value = state.lat;
   $('in-lon').value = state.lon;
+  lookupLocation(state.lat, state.lon);
   render();
 }
 
@@ -1860,13 +2362,13 @@ $('btn-calc').addEventListener('click', () => {
   if (isFinite(lat) && isFinite(lon)) {
     state.lat = lat; state.lon = lon;
     map.setView([lat, lon], Math.max(map.getZoom(), 9));
+    lookupLocation(lat, lon);
     render();
-    showToast(`Coordenadas actualizadas: ${lat}, ${lon}`);
+    showToast(`Coordenadas: ${lat}, ${lon}`);
   }
 });
 ['in-lat', 'in-lon'].forEach(id => $(id).addEventListener('keydown', e => { if (e.key === 'Enter') $('btn-calc').click(); }));
 
-/* PRESET BUTTONS */
 document.querySelectorAll('.preset-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     const lat = parseFloat(btn.dataset.lat), lon = parseFloat(btn.dataset.lon);
@@ -1876,7 +2378,7 @@ document.querySelectorAll('.preset-btn').forEach(btn => {
   });
 });
 
-/* RELIABILITY CONTROLS */
+/* RELIABILITY & OPTIONS */
 function setR(r) {
   state.R = Math.min(0.999, Math.max(0.5, r));
   $('in-r').value = state.R;
@@ -1889,47 +2391,97 @@ document.querySelectorAll('.chips-r button').forEach(b => {
 $('opt-ah').addEventListener('change', e => { state.ahFixed = e.target.checked; render(); });
 $('opt-ord').addEventListener('change', e => { state.sorted = e.target.checked; render(); });
 
+/* TRAFICO Y VELOCIDAD AASHTO M 323 */
+$('in-esals').addEventListener('input', e => {
+  state.esals = parseFloat(e.target.value);
+  $('esals-txt').textContent = `${state.esals.toFixed(1)} M ESALs`;
+  let cat = 'Standard (S)';
+  if (state.esals > 30) cat = 'Extremadamente Pesado (E)';
+  else if (state.esals > 10) cat = 'Muy Pesado (V)';
+  else if (state.esals > 3) cat = 'Heavy (H)';
+  $('esals-cat').textContent = `Categoría: ${cat}`;
+  render();
+});
+
+$('sel-speed').addEventListener('change', e => {
+  state.speed = e.target.value;
+  render();
+});
+
 /* EXPORT & PRINT */
 $('btn-print').addEventListener('click', () => window.print());
 $('btn-copy-summary').addEventListener('click', () => {
-  const r = computePG(state.lat, state.lon, { R: state.R, R_ah: state.ahFixed ? 0.5 : state.R, order: state.sorted ? 't7s' : 't7f' });
+  const r = computePG(state.lat, state.lon, {
+    R: state.R,
+    R_ah: state.ahFixed ? 0.5 : state.R,
+    order: state.sorted ? 't7s' : 't7f',
+    esals: state.esals,
+    speed: state.speed
+  });
   const text = `SUPERPAVE PG - REPÚBLICA DOMINICANA (ASIGNACIÓN 03)
 Proyecto: Lat ${f(state.lat, 5)}°, Lon ${f(state.lon, 5)}°
+Ubicación: ${$('geo-road').textContent} - ${$('geo-details').textContent}
 Confiabilidad: R = ${f(state.R * 100, 1)}% (z = ${f(r.z, 4)})
 Estación MERRA-2: ${r.st.id} (Distancia: ${f(r.dist, 4)}°)
 --------------------------------------------------
 PG Alto (Método 7 Días): PG ${r.PG_alto} (${f(r.T_pav_alto, 2)} °C)
 PG Alto (Ahuellamiento): PG ${r.PG_ah} (${f(r.PG_H_rel, 2)} °C)
-PG Bajo: PG ${r.PG_bajo} (${f(r.T_pav_bajo, 2)} °C)
+PG Bajo (Térmico): PG ${r.PG_bajo} (${f(r.T_pav_bajo, 2)} °C)
 --------------------------------------------------
-Grado Comercial Superpave: PG ${r.PG_alto}${r.PG_bajo}
-Grado con Ahuellamiento: PG ${r.PG_ah}${r.PG_bajo}`;
+Ajuste Tráfico/Velocidad (AASHTO M 323): ${r.bumpReason}
+Grado Comercial Base: PG ${r.PG_alto}${r.PG_bajo}
+Grado Comercial Recomendado (con Bumping): ${r.PG_com_ajustado}`;
   navigator.clipboard.writeText(text).then(() => showToast('¡Resumen técnico copiado!'));
 });
 
-/* ===== CHART.JS CONFIGURATION ===== */
+/* ===== CHART.JS CON PLUGIN DE CROSSHAIR INTERACTIVO ===== */
 Chart.defaults.font.family = "'JetBrains Mono', monospace";
 Chart.defaults.font.weight = 600;
 Chart.defaults.color = '#94a3b8';
 Chart.defaults.borderColor = 'rgba(255,255,255,0.08)';
+
+const crosshairPlugin = {
+  id: 'crosshair',
+  afterDraw: (chart) => {
+    if (chart.tooltip?._active?.length) {
+      const activePoint = chart.tooltip._active[0];
+      const { ctx } = chart;
+      const { x } = activePoint.element;
+      const topY = chart.scales.y.top;
+      const bottomY = chart.scales.y.bottom;
+
+      ctx.save();
+      ctx.beginPath();
+      ctx.moveTo(x, topY);
+      ctx.lineTo(x, bottomY);
+      ctx.lineWidth = 1.5;
+      ctx.setLineDash([4, 4]);
+      ctx.strokeStyle = '#00f0ff';
+      ctx.stroke();
+      ctx.restore();
+    }
+  }
+};
+
 const gridOpt = { color: 'rgba(255,255,255,0.06)', lineWidth: 1 };
 
 const chDist = new Chart($('ch-dist'), {
   type: 'line',
   data: { datasets: [] },
+  plugins: [crosshairPlugin],
   options: {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 250 },
+    animation: { duration: 200 },
     parsing: false,
-    interaction: { mode: 'nearest', intersect: false },
+    interaction: { mode: 'index', intersect: false },
     scales: {
-      x: { type: 'linear', title: { display: true, text: 'Temperatura del Aire (°C)' }, grid: gridOpt, border: { width: 2 } },
-      y: { title: { display: true, text: 'Densidad de Probabilidad' }, grid: gridOpt, border: { width: 2 }, beginAtZero: true }
+      x: { type: 'linear', title: { display: true, text: 'Temperatura del Aire (°C)' }, grid: gridOpt },
+      y: { title: { display: true, text: 'Densidad de Probabilidad' }, grid: gridOpt, beginAtZero: true }
     },
     plugins: {
-      legend: { labels: { boxWidth: 14, boxHeight: 14 } },
-      tooltip: { backgroundColor: '#000', cornerRadius: 0 }
+      legend: { labels: { boxWidth: 12, boxHeight: 12 } },
+      tooltip: { backgroundColor: 'rgba(9,12,22,0.92)', borderColor: '#00f0ff', borderWidth: 1 }
     }
   }
 });
@@ -1937,17 +2489,19 @@ const chDist = new Chart($('ch-dist'), {
 const chYear = new Chart($('ch-year'), {
   type: 'bar',
   data: { labels: [], datasets: [] },
+  plugins: [crosshairPlugin],
   options: {
     responsive: true,
     maintainAspectRatio: false,
-    animation: { duration: 250 },
+    animation: { duration: 200 },
+    interaction: { mode: 'index', intersect: false },
     scales: {
-      x: { grid: { display: false }, border: { width: 2 }, ticks: { maxRotation: 90, minRotation: 90 } },
-      y: { title: { display: true, text: 'Temperatura (°C)' }, grid: gridOpt, border: { width: 2 } }
+      x: { grid: { display: false }, ticks: { maxRotation: 90, minRotation: 90 } },
+      y: { title: { display: true, text: 'Temperatura (°C)' }, grid: gridOpt }
     },
     plugins: {
-      legend: { labels: { boxWidth: 14, boxHeight: 14 } },
-      tooltip: { backgroundColor: '#000', cornerRadius: 0 }
+      legend: { labels: { boxWidth: 12, boxHeight: 12 } },
+      tooltip: { backgroundColor: 'rgba(9,12,22,0.92)', borderColor: '#00f0ff', borderWidth: 1 }
     }
   }
 });
@@ -1972,8 +2526,8 @@ function histStep(vals, bins = 15) {
 
 function pdfPts(m, s) {
   const pts = [];
-  for (let i = 0; i <= 100; i++) {
-    const x = m - 4 * s + (8 * s * i) / 100;
+  for (let i = 0; i <= 80; i++) {
+    const x = m - 4 * s + (8 * s * i) / 80;
     pts.push({ x, y: Math.exp(-0.5 * (((x - m) / s) ** 2)) / (s * Math.sqrt(2 * Math.PI)) });
   }
   return pts;
@@ -1982,10 +2536,16 @@ function pdfPts(m, s) {
 /* ===== MAIN RENDER ===== */
 function render() {
   const R_ah = state.ahFixed ? 0.5 : state.R;
-  const r = computePG(state.lat, state.lon, { R: state.R, R_ah, order: state.sorted ? 't7s' : 't7f' });
+  const r = computePG(state.lat, state.lon, {
+    R: state.R,
+    R_ah,
+    order: state.sorted ? 't7s' : 't7f',
+    esals: state.esals,
+    speed: state.speed
+  });
   const s = r.st;
 
-  // Controls UI
+  // Controls UI Readout
   $('r-txt').textContent = `R = ${f(state.R * 100, 1)}%`;
   $('z-txt').textContent = `z = ${f(r.z, 4)}`;
   document.querySelectorAll('.chips-r button').forEach(b => {
@@ -2007,7 +2567,25 @@ function render() {
   link.setLatLngs([[state.lat, state.lon], [s.lat, s.lon]]);
   updateHeatmap();
 
-  // Top KPI Stat Cards
+  // Inspector K-NN Influence Table
+  const knn = findKNN(state.lat, state.lon, 4);
+  let knnRows = '';
+  knn.forEach(k => {
+    const pct = Math.round(k.weight * 100);
+    knnRows += `<tr>
+      <td><b>${k.st.id}</b></td>
+      <td>${f(k.dist, 3)}°</td>
+      <td>${pct}%</td>
+      <td>
+        <div class="knn-bar-wrap">
+          <div class="knn-bar-fill" style="width:${pct}%"></div>
+        </div>
+      </td>
+    </tr>`;
+  });
+  $('inspector-knn-body').innerHTML = knnRows;
+
+  // Top KPI Stat Cards in Right Inspector
   $('kpi-pg-alto').textContent = `PG ${r.PG_alto}`;
   $('kpi-t-alto').textContent = `${f(r.T_pav_alto)} °C`;
   $('kpi-r-alto').textContent = `R = ${f(state.R * 100, 1)}%`;
@@ -2020,21 +2598,82 @@ function render() {
   $('kpi-t-bajo').textContent = `${f(r.T_pav_bajo)} °C`;
   $('kpi-r-bajo').textContent = `R = ${f(state.R * 100, 1)}%`;
 
-  $('kpi-pg-com').textContent = `PG ${r.PG_alto}${r.PG_bajo}`;
-  $('kpi-pg-com-ah').textContent = `PG ${r.PG_ah}${r.PG_bajo} (Ahuellamiento)`;
+  $('kpi-pg-com').textContent = r.PG_com_ajustado;
+  $('kpi-bump-badge').textContent = r.bumpReason;
+  $('kpi-traffic-summary').textContent = `${state.esals.toFixed(1)}M ESALs · ${state.speed === 'fast' ? 'Rápida' : (state.speed === 'slow' ? 'Lenta' : 'Parada')}`;
+  $('kpi-pg-com-ah').textContent = `PG ${r.PG_ah}${r.PG_bajo} (Ah.)`;
 
   // Status bar
   $('sb-st').textContent = s.id;
   $('sb-coord').textContent = `${f(state.lat, 5)}° N, ${f(state.lon, 5)}° W`;
   $('sb-dist').textContent = `${f(r.dist, 4)}°`;
 
-  // Steps breakdown
+  // TAB 2: COMPARATIVA TABLES
+  let compKnnRows = '';
+  knn.forEach(k => {
+    const kRes = computePG(k.st.lat, k.st.lon, { R: state.R, R_ah, order: state.sorted ? 't7s' : 't7f' });
+    compKnnRows += `<tr>
+      <td><b>MERRA ${k.st.id}</b> ${k.st.id === s.id ? '⭐ (Asignada)' : ''}</td>
+      <td>${f(k.dist, 4)}°</td>
+      <td><b>${Math.round(k.weight * 100)}%</b></td>
+      <td>${k.st.elev} m</td>
+      <td>${f(kRes.T_air_max, 2)} °C</td>
+      <td>${f(kRes.T_air_min, 2)} °C</td>
+      <td>${f(kRes.DD, 3)}</td>
+      <td><b>PG ${kRes.PG_alto}</b> (${f(kRes.T_pav_alto, 1)}°)</td>
+      <td><b>PG ${kRes.PG_ah}</b> (${f(kRes.PG_H_rel, 1)}°)</td>
+      <td><b>PG ${kRes.PG_bajo}</b></td>
+    </tr>`;
+  });
+  $('body-comp-knn').innerHTML = compKnnRows;
+
+  // Sensibilidad R
+  const rSensList = [0.50, 0.85, 0.90, 0.95, 0.98, 0.99];
+  let sensRows = '';
+  rSensList.forEach(rVal => {
+    const sRes = computePG(state.lat, state.lon, { R: rVal, R_ah: rVal, order: state.sorted ? 't7s' : 't7f' });
+    sensRows += `<tr class="${Math.abs(rVal - state.R) < 1e-3 ? 'extreme-row' : ''}">
+      <td><b>${(rVal * 100).toFixed(0)}%</b></td>
+      <td>${f(sRes.z, 4)}</td>
+      <td>${f(sRes.T_pav_alto, 2)} °C</td>
+      <td><b>PG ${sRes.PG_alto}</b></td>
+      <td><b>PG ${sRes.PG_ah}</b> (${f(sRes.PG_H_rel, 2)} °C)</td>
+      <td>${f(sRes.T_pav_bajo, 2)} °C</td>
+      <td><b>PG ${sRes.PG_bajo}</b></td>
+      <td><b>PG ${sRes.PG_alto}${sRes.PG_bajo}</b></td>
+    </tr>`;
+  });
+  $('body-comp-sens').innerHTML = sensRows;
+
+  // Matriz de Tráfico
+  const trafficCats = [
+    { name: 'Standard (S)', esals: 1.0 },
+    { name: 'Heavy (H)', esals: 5.0 },
+    { name: 'Very Heavy (V)', esals: 15.0 },
+    { name: 'Extremely Heavy (E)', esals: 35.0 }
+  ];
+  let trRows = '';
+  trafficCats.forEach(tc => {
+    const pFast = computePG(state.lat, state.lon, { R: state.R, R_ah, esals: tc.esals, speed: 'fast' });
+    const pSlow = computePG(state.lat, state.lon, { R: state.R, R_ah, esals: tc.esals, speed: 'slow' });
+    const pStand = computePG(state.lat, state.lon, { R: state.R, R_ah, esals: tc.esals, speed: 'standing' });
+    trRows += `<tr>
+      <td><b>${tc.name}</b></td>
+      <td>${tc.esals < 3 ? '< 3M' : (tc.esals < 10 ? '3 - 10M' : (tc.esals < 30 ? '10 - 30M' : '> 30M'))}</td>
+      <td>${pFast.PG_com_ajustado}</td>
+      <td>${pSlow.PG_com_ajustado}</td>
+      <td>${pStand.PG_com_ajustado}</td>
+    </tr>`;
+  });
+  $('body-comp-traffic').innerHTML = trRows;
+
+  // TAB 5: MEMORIA DE CALCULO FORMAL
   const L2 = f(state.lat, 5);
   $('steps-container').innerHTML = `
     <div class="step-card">
       <h3><span class="num">01</span> Estación Más Cercana</h3>
-      <p style="font-size:0.75rem;margin-bottom:6px">Selección por mínima distancia euclidiana en grados decimales:</p>
-      <div class="eq-block">d = √((Lat<sub>est</sub> − Lat)² + (Lon<sub>est</sub> − Lon)²)\n  = √((${s.lat} − ${L2})² + (${s.lon} − ${f(state.lon, 5)})²)\n  = <b>${f(r.dist, 4)}°</b>  →  Estación MERRA <b>${s.id}</b> (${s.elev} m)</div>
+      <p style="font-size:0.75rem;margin-bottom:6px">Mínima distancia euclidiana a centroides MERRA-2:</p>
+      <div class="eq-block">d = √((${s.lat} − ${L2})² + (${s.lon} − ${f(state.lon, 5)})²)\n  = <b>${f(r.dist, 4)}°</b>  →  Estación MERRA <b>${s.id}</b> (${s.elev} m)</div>
     </div>
 
     <div class="step-card">
@@ -2045,62 +2684,142 @@ function render() {
 
     <div class="step-card">
       <h3><span class="num">03</span> PG Alto Clásico (7 Días)</h3>
-      <p style="font-size:0.75rem;margin-bottom:6px">Transformación a temperatura del pavimento a 20 mm de profundidad:</p>
+      <p style="font-size:0.75rem;margin-bottom:6px">Transformación térmica a 20 mm de profundidad con confiabilidad R:</p>
       <div class="eq-block">z = Φ⁻¹(${state.R}) = <b>${f(r.z, 4)}</b>\nT<sub>pav</sub> = 54.32 + 0.78·${f(r.T_air_max, 4)} − 0.0025·${L2}² − 15.14·log₁₀(20+25)\n      = <b>${f(r.T_pav_prom, 4)}</b> °C\nσ<sub>pav</sub> = √(9 + 0.61·${f(r.sigma_air_max, 4)}²) = <b>${f(r.sigma_pav_max, 4)}</b> °C\nT<sub>alto</sub> = ${f(r.T_pav_prom, 4)} + ${f(r.z, 4)}·${f(r.sigma_pav_max, 4)} = <b>${f(r.T_pav_alto, 4)}</b> °C\nGrado comercial ≥ T<sub>alto</sub>  →  <b>PG ${r.PG_alto}</b></div>
     </div>
 
     <div class="step-card">
       <h3><span class="num">04</span> PG Bajo (Agrietamiento Térmico)</h3>
-      <p style="font-size:0.75rem;margin-bottom:6px">Transformación a temperatura superficial del pavimento (H = 0 mm):</p>
+      <p style="font-size:0.75rem;margin-bottom:6px">Transformación térmica superficial (H = 0 mm):</p>
       <div class="eq-block">T<sub>pav,bajo</sub> = −1.56 + 0.72·${f(r.T_air_min, 4)} − 0.004·${L2}² + 6.26·log₁₀(0+25)\n           = <b>${f(r.T_pav_prom_bajo, 4)}</b> °C\nσ<sub>pav</sub> = √(4.4 + 0.52·${f(r.sigma_air_min, 4)}²) = <b>${f(r.sigma_pav_min, 4)}</b> °C\nT<sub>bajo</sub> = ${f(r.T_pav_prom_bajo, 4)} − ${f(r.z, 4)}·${f(r.sigma_pav_min, 4)} = <b>${f(r.T_pav_bajo, 4)}</b> °C\nGrado comercial más cercano  →  <b>PG ${r.PG_bajo}</b></div>
     </div>
 
     <div class="step-card">
       <h3><span class="num">05</span> Grados-Día Acumulados (DD)</h3>
-      <p style="font-size:0.75rem;margin-bottom:6px">Cálculo de daño térmico diario sobre umbral base de 10 °C:</p>
-      <div class="eq-block">T<sub>media</sub> = (T<sub>max</sub> + T<sub>min</sub>) / 2\nGD<sub>diario</sub> = max(T<sub>media</sub> − 10, 0)\nΣ anual promedio = <b>${f(r.DD_prom, 2)}</b> °C·día\nDD = ${f(r.DD_prom, 2)} / 1000 = <b>${f(r.DD, 4)}</b></div>
+      <p style="font-size:0.75rem;margin-bottom:6px">Daño térmico diario acumulado sobre base 10 °C:</p>
+      <div class="eq-block">GD<sub>diario</sub> = max(T<sub>media</sub> − 10, 0)\nΣ anual promedio = <b>${f(r.DD_prom, 2)}</b> °C·día\nDD = ${f(r.DD_prom, 2)} / 1000 = <b>${f(r.DD, 4)}</b></div>
     </div>
 
     <div class="step-card">
       <h3><span class="num">06</span> Modelo de Daños por Ahuellamiento</h3>
-      <p style="font-size:0.75rem;margin-bottom:6px">Aplicación de ecuaciones empíricas Superpave 5.9 a 5.11:</p>
+      <p style="font-size:0.75rem;margin-bottom:6px">Ecuaciones empíricas Superpave 5.9 a 5.11:</p>
       <div class="eq-block">PG<sub>H,d</sub> = 48.2 + 14·${f(r.DD, 4)} − 0.96·${f(r.DD, 4)}² − 2·10 = <b>${f(r.PG_H_d, 4)}</b> °C   (Ec. 5.9)\nCV<sub>PG</sub> = 0.000034·(${L2} − 20)²·10² = <b>${f(r.CVPG, 4)}</b> %   (Ec. 5.10)\nz = Φ⁻¹(${R_ah}) = ${f(r.Z_ah, 4)}\nPG<sub>H,rel</sub> = ${f(r.PG_H_d, 4)} + ${f(r.Z_ah, 4)}·(${f(r.PG_H_d, 4)}·${f(r.CVPG, 4)}/100) = <b>${f(r.PG_H_rel, 4)}</b> °C   (Ec. 5.11)\nGrado comercial ≥ PG<sub>H,rel</sub>  →  <b>PG ${r.PG_ah}</b></div>
     </div>
   `;
 
-  // Annual data table
-  const iMax = r.t7.indexOf(Math.max(...r.t7));
-  const iMin = r.tmin.indexOf(Math.min(...r.tmin));
-  let rows = '';
-  for (let i = s.years.length - 1; i >= 0; i--) {
-    const isExt = (i === iMax || i === iMin);
-    rows += `<tr class="${isExt ? 'extreme-row' : ''}">
-      <td>${s.years[i]} ${i === iMax ? '🔥 (Máx)' : (i === iMin ? '❄️ (Mín)' : '')}</td>
-      <td>${f(r.t7[i], 4)}</td>
-      <td>${f(r.tmin[i], 1)}</td>
-      <td>${f(r.ddA[i], 2)}</td>
-    </tr>`;
-  }
-  $('t-year-body').innerHTML = rows;
-
-  // Update Charts
+  // TAB 3: CHARTS UPDATE WITH CROSSHAIR
   chDist.data.datasets = [
-    { label: 'Hist. T máx. prom. 7 días', data: histStep(r.t7), borderColor: '#ff6b2c', backgroundColor: 'rgba(255,107,44,0.3)', fill: 'origin', borderWidth: 2, pointRadius: 0, tension: 0 },
+    { label: 'Hist. T máx. 7 días', data: histStep(r.t7), borderColor: '#ff6b2c', backgroundColor: 'rgba(255,107,44,0.3)', fill: 'origin', borderWidth: 2, pointRadius: 0, tension: 0 },
     { label: 'Hist. T mín. anual', data: histStep(r.tmin), borderColor: '#00f0ff', backgroundColor: 'rgba(0,240,255,0.25)', fill: 'origin', borderWidth: 2, pointRadius: 0, tension: 0 },
-    { label: 'Normal T máx. (Gauss)', data: pdfPts(r.T_air_max, r.sigma_air_max), borderColor: '#ff6b2c', borderWidth: 3, pointRadius: 0, fill: false },
-    { label: 'Normal T mín. (Gauss)', data: pdfPts(r.T_air_min, r.sigma_air_min), borderColor: '#00f0ff', borderDash: [6, 4], borderWidth: 3, pointRadius: 0, fill: false }
+    { label: 'Normal T máx. (Gauss)', data: pdfPts(r.T_air_max, r.sigma_air_max), borderColor: '#ff6b2c', borderWidth: 2.5, pointRadius: 0, fill: false },
+    { label: 'Normal T mín. (Gauss)', data: pdfPts(r.T_air_min, r.sigma_air_min), borderColor: '#00f0ff', borderDash: [5, 4], borderWidth: 2.5, pointRadius: 0, fill: false }
   ];
   chDist.update();
 
   chYear.data.labels = s.years;
   chYear.data.datasets = [
-    { label: 'T máx. prom. 7 días (°C)', data: r.t7, backgroundColor: 'rgba(255,107,44,0.85)', borderColor: '#ff6b2c', borderWidth: 1.5, borderRadius: 4 },
-    { label: 'T mín. anual (°C)', data: r.tmin, backgroundColor: 'rgba(0,240,255,0.75)', borderColor: '#00f0ff', borderWidth: 1.5, borderRadius: 4 }
+    { label: 'T máx. prom. 7 días (°C)', data: r.t7, backgroundColor: 'rgba(255,107,44,0.85)', borderColor: '#ff6b2c', borderWidth: 1.5, borderRadius: 3 },
+    { label: 'T mín. anual (°C)', data: r.tmin, backgroundColor: 'rgba(0,240,255,0.75)', borderColor: '#00f0ff', borderWidth: 1.5, borderRadius: 3 }
   ];
   chYear.update();
+
+  renderCatalog();
 }
 
-/* ===== RENDER VERIFICATION TABLE ===== */
+/* ===== TAB 4: CATALOGO STICKY TABLE ===== */
+function renderCatalog() {
+  const isStations = (state.activeCatTab === 'stations');
+  const q = ($('cat-search-input') ? $('cat-search-input').value.toLowerCase().trim() : '');
+
+  if (isStations) {
+    $('cat-table-head').innerHTML = `
+      <tr>
+        <th>ID MERRA-2</th>
+        <th>Latitud</th>
+        <th>Longitud</th>
+        <th>Elevación</th>
+        <th>T. Máx (7d)</th>
+        <th>T. Mín</th>
+        <th>Grados-Día (DD)</th>
+        <th>PG 7 Días</th>
+        <th>PG Ahuell.</th>
+        <th>PG Comercial</th>
+      </tr>
+    `;
+
+    let rows = '';
+    STATIONS.forEach(s => {
+      if (q && !s.id.toString().includes(q)) return;
+      const res = computePG(s.lat, s.lon, { R: state.R, R_ah: state.ahFixed ? 0.5 : state.R, order: state.sorted ? 't7s' : 't7f' });
+      const isSel = (s.id === nearestStation(state.lat, state.lon).st.id);
+      rows += `
+        <tr class="${isSel ? 'selected' : ''}" onclick="selectStation(${s.id})">
+          <td><b>MERRA ${s.id}</b> ${isSel ? '⭐' : ''}</td>
+          <td>${f(s.lat, 3)}°</td>
+          <td>${f(s.lon, 3)}°</td>
+          <td>${s.elev} m</td>
+          <td>${f(res.T_air_max, 2)} °C</td>
+          <td>${f(res.T_air_min, 2)} °C</td>
+          <td>${f(res.DD, 3)}</td>
+          <td><b>PG ${res.PG_alto}</b></td>
+          <td><b>PG ${res.PG_ah}</b></td>
+          <td><b>PG ${res.PG_alto}${res.PG_bajo}</b></td>
+        </tr>
+      `;
+    });
+    $('cat-table-body').innerHTML = rows || '<tr><td colspan="10" style="text-align:center;padding:20px">No se encontraron estaciones coincidentes</td></tr>';
+
+  } else {
+    $('cat-table-head').innerHTML = `
+      <tr>
+        <th>Estación</th>
+        <th>Año</th>
+        <th>Máx. 7 Días T<sub>max</sub> (°C)</th>
+        <th>T<sub>min</sub> Anual del Aire (°C)</th>
+        <th>Grados-Día Acumulados &gt; 10°C</th>
+      </tr>
+    `;
+
+    let rows = '';
+    let count = 0;
+    STATIONS.forEach(s => {
+      if (q && !s.id.toString().includes(q)) return;
+      for (let i = s.years.length - 1; i >= 0; i--) {
+        rows += `
+          <tr onclick="selectStation(${s.id})">
+            <td><b>MERRA ${s.id}</b></td>
+            <td>${s.years[i]}</td>
+            <td>${f(s[state.sorted ? 't7s' : 't7f'][i], 4)}</td>
+            <td>${f(s.tmin[i], 1)}</td>
+            <td>${f(s.dd[i], 2)}</td>
+          </tr>
+        `;
+        count++;
+      }
+    });
+    $('cat-table-body').innerHTML = rows || '<tr><td colspan="5" style="text-align:center;padding:20px">No se encontraron registros</td></tr>';
+  }
+}
+
+$('btn-cat-stations').addEventListener('click', () => {
+  state.activeCatTab = 'stations';
+  $('btn-cat-stations').classList.add('active');
+  $('btn-cat-records').classList.remove('active');
+  renderCatalog();
+});
+
+$('btn-cat-records').addEventListener('click', () => {
+  state.activeCatTab = 'records';
+  $('btn-cat-records').classList.add('active');
+  $('btn-cat-stations').classList.remove('active');
+  renderCatalog();
+});
+
+if ($('cat-search-input')) {
+  $('cat-search-input').addEventListener('input', () => renderCatalog());
+}
+
+/* ===== TAB 5: RENDER VERIFICATION TABLE ===== */
 function renderVerif() {
   let html = '';
   VERIF_PY.forEach((p, i) => {
@@ -2131,7 +2850,12 @@ function renderVerif() {
   $('t-verif-body').innerHTML = html;
 }
 
-// Initial Run
+try {
+  const savedTheme = localStorage.getItem('superpave_theme');
+  if (savedTheme) setTheme(savedTheme);
+} catch(e){}
+
+lookupLocation(state.lat, state.lon);
 render();
 renderVerif();
 </script>
