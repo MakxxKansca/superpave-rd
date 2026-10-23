@@ -39,6 +39,14 @@ Puedes acceder y utilizar el workbench directamente desde tu navegador sin insta
 - **Gráficos Analíticos Dinámicos**:
   - Series temporales multianuales de temperaturas máximas y mínimas por estación.
   - Curvas de distribución normal Gaussiana con indicador del percentil de confiabilidad seleccionado ($Z \cdot \sigma$).
+- **🔥 Mapa de Calor Térmico Interactivo (Heatmap)**:
+  - Interpolación continua en tiempo real mediante **IDW (Inverse Distance Weighting)** sobre toda la geografía y red vial de República Dominicana.
+  - Selección dinámica de variable térmica:
+    - 🔥 **Temperatura Alta de Pavimento ($T_{\text{pav, alto}}$)**: Detección visual de zonas críticas de calor (Cibao, Línea Noroeste, Valle de San Juan, Santo Domingo).
+    - ❄️ **Temperatura Baja de Pavimento ($T_{\text{pav, bajo}}$)**: Gradiente térmico nocturno e invernal (Cordillera Central, Constanza, Jarabacoa vs litorales).
+    - ⚠️ **Demanda por Ahuellamiento (DD)**: Acumulación de daño y severidad plástica.
+    - ☀️ **Temperatura Máxima del Aire (7 días consecutivos)**.
+  - Control de opacidad térmica deslizable (20% – 100%), activación/desactivación instantánea y leyenda flotante calibrada en $^{\circ}\text{C}$.
 - **Modo Standalone / 100% Client-Side**:
   - Funciona tanto online mediante GitHub Pages como en modo offline local (`file:///`).
   - Cero dependencias de backend: los datasets y los algoritmos residen integrados en el bundle HTML/JS.

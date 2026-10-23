@@ -33,3 +33,10 @@
 - README.md: documentacion tecnica completa con formulas Superpave/LTPP, tabla de validacion cruzada Python (5/5 PASS), guia de uso y enlaces en vivo.
 - .gitignore: exclusion de archivos legacy de Colab y temporales.
 - git init & gh repo create: creacion del repositorio publico MakxxKansca/superpave-rd y despliegue a GitHub Pages.
+
+[2026-10-22 19:34]
+- tools/template.html: implementacion del mapa de calor termico (heatmap) mediante IDW (Inverse Distance Weighting) sobre las 44 estaciones meteorologicas de RD, integracion de Leaflet.heat con fallback offline, leyenda dinamica en tiempo real, selector de variable termica (T. pav alto, T. pav bajo, ahuellamiento DD, T. aire max) y control de opacidad en el sidebar.
+- tools/leaflet-heat.min.js: script minificado integrado para garantizar ejecucion 100% offline sin conexion CDN.
+- tools/build_and_test.js: recompilacion sincronizada de PG_RD.html, PG_RD_brutalista.html e index.html con suite de pruebas aprobada (5/5 PASS).
+- README.md: documentacion de la funcionalidad del mapa de calor y variables termicas.
+- Git & GitHub Pages: sincronizacion con origen remoto para despliegue automatico en vivo.

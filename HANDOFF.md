@@ -1,26 +1,34 @@
 # HANDOFF
 
 ## Estado Actual
-- **Fase**: Publicación y Despliegue en GitHub Pages.
+- **Fase**: Mapa de Calor Térmico (Heatmap) Desplegado en GitHub Pages.
 - **Repositorio Público**: [MakxxKansca/superpave-rd](https://github.com/MakxxKansca/superpave-rd)
 - **URL en Vivo**: [https://makxxkansca.github.io/superpave-rd/](https://makxxkansca.github.io/superpave-rd/)
 - **Entregables Principales**:
-  - [index.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/index.html) (punto de entrada en GitHub Pages).
-  - [PG_RD.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD.html) (workbench interactivo).
-  - [PG_RD_brutalista.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD_brutalista.html) (variante brutalista).
-  - [README.md](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/README.md) (documentación técnica completa con badges y fórmulas).
+  - [index.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/index.html) (punto de entrada en GitHub Pages con Heatmap).
+  - [PG_RD.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD.html) y [PG_RD_brutalista.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/PG_RD_brutalista.html).
+  - [README.md](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/README.md) (documentación con sección de Capa Térmica).
 - **Validación Numérica**: 5/5 casos de prueba cruzada Python vs JS aprobados (error < 5e-9 °C).
 
-## Motor de Mapas y Compatibilidad Web
-- Cartografía libre de Esri (Topo, Imagery, Street, Canvas) y OpenTopoMap sin marcas de agua ni API keys.
-- Bundle 100% client-side: no requiere servidor dinámico ni base de datos externa.
+## Características de la Capa Térmica (Heatmap)
+- **Algoritmo**: Interpolación IDW ($1/d^2$) sobre grilla de $0.07^\circ$ (~1,400 puntos) recortada al territorio dominicano.
+- **Variables Seleccionables**:
+  1. 🔥 *T. Pavimento Alta (PG Alto)*: Zonas críticas de calor según LTPP y confiabilidad $R$.
+  2. ❄️ *T. Pavimento Baja (PG Bajo)*: Gradiente térmico nocturno y de montaña.
+  3. ⚠️ *Demanda Ahuellamiento (DD)*: Severidad plástica y acumulación de daño.
+  4. ☀️ *Temp. Máx. Aire (7 Días)*: Promedio histórico 2000–2025.
+- **Controles y Visualización**:
+  - Switch on/off en Sección 04 del sidebar dock y en control de capas de Leaflet.
+  - Slider de opacidad térmica (20% – 100%).
+  - Leyenda flotante dinámica en esquina superior derecha con valores mín, prom y máx en $^{\circ}\text{C}$.
+  - Fallback offline integrado de Leaflet.heat para compatibilidad total `file:///`.
 
 ## Archivos Tocados
-- `tools/build_and_test.js`: Emisión simultánea de `PG_RD.html`, `PG_RD_brutalista.html` e `index.html`.
-- `index.html`: Entry point para GitHub Pages.
-- `README.md`: Documentación formal con formulaciones LTPP, AASHTO M 320 y tabla de pruebas.
-- `.gitignore`: Reglas para exclusión de temporales y archivos legados de Colab.
-- `CHANGELOG_AGENT.md` y `HANDOFF.md`: Registro de memoria continua del agente.
+- `tools/template.html`: Implementación del motor de calor, estilos y leyenda.
+- `tools/leaflet-heat.min.js`: Script minificado como respaldo offline.
+- `index.html`, `PG_RD.html`, `PG_RD_brutalista.html`: Bundles compilados.
+- `README.md`: Documentación de la nueva funcionalidad.
+- `CHANGELOG_AGENT.md` y `HANDOFF.md`: Registro de memoria.
 
 ## Próximo Paso Exacto
-- Verificar la propagación del despliegue en GitHub Pages en [https://makxxkansca.github.io/superpave-rd/](https://makxxkansca.github.io/superpave-rd/) y compartir el enlace.
+- Abrir [https://makxxkansca.github.io/superpave-rd/](https://makxxkansca.github.io/superpave-rd/) o el archivo local [index.html](file:///c:/PROYECTOS/01_Ingenieria_Civil/WEB%20PAGE%20TRANSPORTE/index.html) para explorar el nuevo mapa de calor interactivo y alternar entre las variables térmicas.
